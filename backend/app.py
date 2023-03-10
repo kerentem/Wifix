@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, jsonify, request
 import psycopg2
 import logging
@@ -6,10 +8,10 @@ from werkzeug.security import generate_password_hash
 from postgresql_query import *
 
 app = Flask(__name__)
-ENDPOINT = "RDS"
-USERNAME = "postgres"
-PASSWORD = ""
-PORT = 5432
+RDS_ENDPOINT = os.environ["RDS_ENDPOINT"]
+RDS_USERNAME = os.environ["RDS_USERNAME"]
+RDS_PASSWORD = os.environ["RDS_PASSWORD"]
+RDS_PORT = 5432
 DATABASE = "wifix-db"
 connection = None
 cursor = None
@@ -69,10 +71,10 @@ def add_card():
 if __name__ == '__main__':
     try:
         logging.info('PostgreSQL is connecting')
-        connection = psycopg2.connect(user=USERNAME,
-                                      password=PASSWORD,
-                                      host=ENDPOINT,
-                                      port=PORT,
+        connection = psycopg2.connect(user=RDS_USERNAME,
+                                      password=RDS_PASSWORD,
+                                      host=RDS_ENDPOINT,
+                                      port=RDS_PORT,
                                       database=DATABASE)
         cursor = connection.cursor()
         app.run(debug=True, port=8080)
