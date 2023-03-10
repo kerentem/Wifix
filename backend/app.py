@@ -6,9 +6,9 @@ from werkzeug.security import generate_password_hash
 from postgresql_query import *
 
 app = Flask(__name__)
-ENDPOINT = "database-1.ckuyqzreop6b.eu-west-1.rds.amazonaws.com"
+ENDPOINT = "RDS"
 USERNAME = "postgres"
-PASSWORD = "Se123456"
+PASSWORD = ""
 PORT = 5432
 DATABASE = "wifix-db"
 connection = None
