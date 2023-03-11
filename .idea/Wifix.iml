@@ -5,8 +5,13 @@
       <excludeFolder url="file://$MODULE_DIR$/temp" />
       <excludeFolder url="file://$MODULE_DIR$/.tmp" />
       <excludeFolder url="file://$MODULE_DIR$/tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/env" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/db-server/env" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/db-server/wifix_env" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/wifix_env" />
+      <excludeFolder url="file://$MODULE_DIR$/env" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Python 3.9 (Wifix-github) (2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

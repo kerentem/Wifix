@@ -1,3 +1,5 @@
 flask
-#psycopg2-binary
+Flask-Mail
+werkzeug
 psycopg2
+validate_email

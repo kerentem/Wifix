@@ -1,0 +1,143 @@
+{
+	"info": {
+		"_postman_id": "3e936cfc-2d16-4a89-8122-abc895e8661a",
+		"name": "Wifix",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21920336"
+	},
+	"item": [
+		{
+			"name": "Register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"bar_sela\",\n    \"password\": \"Aa12345678\",\n    \"email\": \"bs5295@gmail.com\"\n\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{HOST}}/register",
+					"protocol": "http",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add_card",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"bar_sela\",\n    \"card_number\": \"3566000020000410\",\n    \"exp_month\": \"02\",\n    \"exp_year\": \"2026\",\n    \"cvv\": \"123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{HOST}}/add_card",
+					"protocol": "http",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"add_card"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "start_wifi_session",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"bar_sela\",\n    \"start_time\": {\"date\": \"2022-04-05\",\"time\": \"20:25:30\"},\n    \"end_time\": {\"date\": \"2023-03-11\",\"time\": \"16:11:00\"},\n    \"data_usage\": 2\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{HOST}}/start_wifi_session",
+					"protocol": "http",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"start_wifi_session"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_wifi_session - end_time",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{HOST}}/get_wifi_session/end_time?username=bar_sela",
+					"protocol": "http",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"get_wifi_session",
+						"end_time"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "bar_sela"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "HOST",
+			"value": "127.0.0.1:8080",
+			"type": "string"
+		}
+	]
+}
