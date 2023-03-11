@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import logo from "./logo-no-background.png";
 
 export default function (props) {
     let [authMode, setAuthMode] = useState("signin")
@@ -13,6 +14,7 @@ export default function (props) {
     if (authMode === "signin") {
         return (
             <div className="Auth-form-container">
+                <img src={logo}/>
                 <form className="Auth-form">
                     <div className="Auth-form-content">
                         <h3 className="Auth-form-title">Sign In</h3>
@@ -56,6 +58,7 @@ export default function (props) {
 
     else return (
         <div className="Auth-form-container">
+            <img src={logo}/>
             <form className="Auth-form">
                 <div className="Auth-form-content">
                     <h3 className="Auth-form-title">Sign Up</h3>
