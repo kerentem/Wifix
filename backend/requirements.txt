@@ -1,5 +1,5 @@
 flask
 Flask-Mail
 werkzeug
-psycopg2
 validate_email
+mysql-connector-python
