@@ -1,7 +1,7 @@
 import re
 import validate_email as validate_email_package
 
-from backend.db_server.exception import InvalidEmailException, InvalidPasswordException, InvalidUsernameException, \
+from exception import InvalidEmailException, InvalidPasswordException, \
     InvalidCreditCardException
 
 
