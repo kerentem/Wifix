@@ -1,6 +1,8 @@
 import psutil
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 driver = webdriver.Chrome()
 # Navigate to the router's web interface
@@ -25,10 +27,12 @@ driver.implicitly_wait(10)
 text: str = "//*[@id=/'a38/']"
 driver.switch_to.frame("bottomLeftFrame")
 driver.find_element(By.XPATH, '//*[@id="ol38"]').click()
-#/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[3]/td[2]/input
-driver.find_element(By.XPATH, '//*[@id="a39"]')
+driver.switch_to.default_content()
 driver.switch_to.frame("mainFrame")
-router_info: str = driver.find_element(By.XPATH, '/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[3]/td[1]').text
+
+egress_bandwidth_field = driver.find_element(By.XPATH,
+                                         '//*[@id="t_up_band"]')
+router_info: str = egress_bandwidth_field
 print(router_info)
 
 # Close the webdriver
