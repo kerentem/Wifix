@@ -5,23 +5,26 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 driver = webdriver.Chrome()
-# Navigate to the router's web interface
-driver.get("http://192.168.0.1")
-
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "admin"
-# Find the username and password fields and fill them in
-username_field = driver.find_element(By.ID, "userName")
-username_field.send_keys(ADMIN_USERNAME)
-password_field = driver.find_element(By.ID, "pcPassword")
-password_field.send_keys(ADMIN_PASSWORD)
 
-# Find the login button and click it
-login_button = driver.find_element(By.ID, "loginBtn")
-login_button.click()
+def init_and_login():
+    # Navigate to the router's web interface
+    driver.get("http://192.168.0.1")
 
-# Wait for the page to load
-driver.implicitly_wait(10)
+    # Find the username and password fields and fill them in
+    username_field = driver.find_element(By.ID, "userName")
+    username_field.send_keys(ADMIN_USERNAME)
+    password_field = driver.find_element(By.ID, "pcPassword")
+    password_field.send_keys(ADMIN_PASSWORD)
+
+    # Find the login button and click it
+    login_button = driver.find_element(By.ID, "loginBtn")
+    login_button.click()
+
+    # Wait for the page to load
+    driver.implicitly_wait(10)
+
 
 # Find the router's information
 text: str = "//*[@id=/'a38/']"
@@ -31,8 +34,8 @@ driver.switch_to.default_content()
 driver.switch_to.frame("mainFrame")
 
 egress_bandwidth_field = driver.find_element(By.XPATH,
-                                         '//*[@id="t_up_band"]')
-router_info: str = egress_bandwidth_field
+                                             '//*[@id="t_up_band"]')
+router_info = egress_bandwidth_field
 print(router_info)
 
 # Close the webdriver
