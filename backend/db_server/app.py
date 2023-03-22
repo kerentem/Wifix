@@ -1,6 +1,6 @@
 import os
 from typing import Optional
-from datetime import datetime
+import datetime
 from flask import Flask, request
 import logging
 
@@ -20,6 +20,43 @@ RDS_PORT = 3306
 DATABASE = "wifix_db"
 
 logger = logging.getLogger(__name__)
+def is_user_registered(email: str) -> bool:
+    try:
+        cursor.execute(
+            IS_USER_REGISTERED_QUERY,
+            (email)
+        )
+
+        user = cursor.fetchone()
+
+        if user:
+            return True
+        else:
+            return False
+
+    except mysql.connector.errors as error:
+        raise Exception(f"Error while checking if a user registered, with MySQL,\n"
+                        f"Error: {error}")
+
+def is_wifi_session_expired(email: str) -> bool:
+    try:
+        cursor.execute(
+            IS_WIFI_SESSION_EXPIRED_QUERY, (email,)
+        )
+
+        is_expired: bool = cursor.fetchone() is None
+        return is_expired
+
+    except mysql.connector.errors.IntegrityError:
+        logger.error(f"Error while checking WiFi session with MySQL,\n"
+                     "Error: {error}")
+        raise InvalidUsernameException(f"Hi {email},"
+                                       "\nPlease register first.")
+
+    except mysql.connector.errors as error:
+        logger.error(f"Error while checking WiFi session with MySQL,\n"
+                     f"Error: {error}")
+        raise error
 
 
 @db_server.route('/register', methods=['POST'])
@@ -43,8 +80,6 @@ def register():
 
         connection.commit()
 
-        # send_welcome_email(mail, email, username)
-
         msg = 'User registered successfully'
         response = make_db_server_response(HttpStatus.OK, msg, {})
 
@@ -65,29 +100,15 @@ def login():
     data = request.get_json()
 
     email: str = data['email']
-    password: str = data['password']
 
-    hashed_password: str = generate_password_hash(password)
+    is_user_registered_response = is_user_registered(email)
 
-    try:
-        cursor.execute(
-            IS_USER_EXISTS_QUERY,
-            (email, hashed_password)
-        )
+    if is_user_registered_response:
+        response = make_db_server_response(HttpStatus.OK, "User registered", {"is_user_registered": True})
+    else:
+        response = make_db_server_response(HttpStatus.OK, "User not registered", {"is_user_registered": False})
 
-        user = cursor.fetchone()
-
-        # (BarSe) need to talk with Keren on it !!!
-        if user is not None:
-            response = make_db_server_response(HttpStatus.OK, "", {})
-            return response
-        else:
-            raise Exception
-
-    except mysql.connector.errors as error:
-        raise Exception(f"Error while creating a new user with MySQL,\n"
-                        f"Error: {error}")
-
+    return response
 
 @db_server.route('/add_card', methods=['POST'])
 def add_card():
@@ -130,23 +151,33 @@ def add_card():
         raise error
 
 
-@db_server.route('/start_wifi_session', methods=['POST'])
+@db_server.route('/wifi_session/start', methods=['POST'])
 def start_wifi_session():
     data = request.get_json()
 
     email: str = data['email']
+    end_time_in_min: int = data['end_time_in_min']
     data_usage: Optional[int] = data.get('data_usage') if data.get('data_usage') else 0
+
+    is_user_registered_response = is_user_registered(email)
+
+    if not is_user_registered_response:
+        raise InvalidUsernameException("User not registered")
+
+    if not is_wifi_session_expired(email):
+        raise Exception("There is a wifi session for the user")
 
     if data.get('start_time'):
         date_start_str = data["start_time"]['date']
         time_start_str = data["start_time"]['time']
-        start_time = datetime.strptime(f"{date_start_str} {time_start_str}", '%Y-%m-%d %H:%M:%S')
+        start_time = datetime.datetime.strptime(f"{date_start_str} {time_start_str}", '%Y-%m-%d %H:%M:%S')
     else:
-        start_time = datetime.now()
+        start_time: datetime = datetime.datetime.now()
 
-    date_end_str = data["end_time"]['date']
-    time_end_str = data["end_time"]['time']
-    end_time: datetime = datetime.strptime(f"{date_end_str} {time_end_str}", '%Y-%m-%d %H:%M:%S')
+    end_time: datetime = start_time + datetime.timedelta(minutes=end_time_in_min)
+
+    start_time = start_time.timestamp()
+    end_time = end_time.timestamp()
 
     try:
         cursor.execute(
@@ -162,7 +193,7 @@ def start_wifi_session():
 
     except mysql.connector.IntegrityError as error:
         connection.commit()
-        logger.error(f"Error while inserting credit card with MySQL, error: {error}")
+        logger.error(f"Error while starting WiFi session with MySQL, error: {error}")
         raise InvalidUsernameException(f"Hi {email},"
                                        "\nPlease register first.")
 
@@ -172,37 +203,21 @@ def start_wifi_session():
                      f"Error: {error}")
         raise error
 
-
-@db_server.route('/get_wifi_session/end_time', methods=['Get'])
-def get_wifi_session_end_time():
+@db_server.route('/wifi_session/is_expired', methods=['Get'])
+def is_wifi_session_expired_endpoint():
     email = request.args['email']
 
-    try:
-        cursor.execute(
-            GET_WIFI_SESSION_END_TIME_QUERY, (email,)
-        )
+    is_expired = is_wifi_session_expired
+    if is_expired:
+        msg = f"Wifi session is expired for email: {email}"
+    else:
+        msg = f"Wifi session is not expired for email: {email}"
 
-        results = cursor.fetchall()[0]
+    data = {"is_expired": is_expired}
 
-        wifi_session_end_time: datetime = results[0]
+    response = make_db_server_response(HttpStatus.OK, msg, data)
 
-        date = wifi_session_end_time.strftime('%Y-%m-%d')
-        time = wifi_session_end_time.strftime('%H:%M:%S')
-
-        data = {"wifi_session_end_time": {"date": date, "time": time}}
-        response = make_db_server_response(HttpStatus.OK, "", data)
-
-        return response
-
-    except mysql.connector.errors.IntegrityError as error:
-        logger.error(f"Error while inserting credit card with MySQL, error: {error}")
-        raise InvalidUsernameException(f"Hi {email},"
-                                       "\nPlease register first.")
-
-    except mysql.connector.errors as error:
-        logger.error(f"Error while inserting WiFi session with MySQL,\n"
-                     f"Error: {error}")
-        raise error
+    return response
 
 
 def creates_tables(connection, cursor):
@@ -210,6 +225,7 @@ def creates_tables(connection, cursor):
         cursor.execute(MySQL_CREATE_USERS_TABLE_QUERY)
         cursor.execute(MySQL_CREATE_CREDIT_CARD_TABLE_QUERY)
         cursor.execute(MySQL_CREATE_WIFI_SESSION_TABLE_QUERY)
+        cursor.execute(MYSQL_WIFI_SESSION_DELETE_EXPIRED_TRIGGER_QUERY)
         connection.commit()
 
 
