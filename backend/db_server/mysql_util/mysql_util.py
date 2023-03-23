@@ -1,30 +1,24 @@
+import logging
+
 import mysql.connector
-from backend.db_server.exception import (
-    InvalidUsernameException,
-    UniqueViolationException,
-)
-from backend.db_server.logger import logger
-from backend.db_server.mysql.MySQL_query import (
-    IS_USER_REGISTERED_QUERY,
-    IS_WIFI_SESSION_EXPIRED_QUERY,
-    MySQL_CREATE_USERS_TABLE_QUERY,
-    MySQL_CREATE_CREDIT_CARD_TABLE_QUERY,
-    MySQL_CREATE_WIFI_SESSION_TABLE_QUERY,
-    INSERT_A_USER_QUERY,
-    INSERT_CREDIT_CARD_BY_USER_ID_QUERY,
-    INSERT_WIFI_SESSION_QUERY,
-    MYSQL_WIFI_SESSION_DELETE_EXPIRED_EVENT_QUERY,
-)
+
+from mysql_util.mysql_query import *
+from mysql_util.mysql_exception import *
+
+logger = logging.getLogger(__name__)
+
+
+from flask_bcrypt import check_password_hash
 
 
 class MysqlUtil:
     def __init__(
-            self,
-            rds_username: str,
-            rds_password: str,
-            rds_endpoint: str,
-            database: str,
-            rds_port: int,
+        self,
+        rds_username: str,
+        rds_password: str,
+        rds_endpoint: str,
+        database: str,
+        rds_port: int,
     ):
         logger.info("Connecting to MySQL database.")
         self.connection = mysql.connector.connect(
@@ -55,16 +49,38 @@ class MysqlUtil:
             self.cursor.execute(MYSQL_WIFI_SESSION_DELETE_EXPIRED_EVENT_QUERY)
             self.connection.commit()
 
-    def is_user_registered(self, email: str) -> bool:
+    def is_email_registered(self, email: str) -> bool:
         try:
-            self.cursor.execute(IS_USER_REGISTERED_QUERY, email)
+            self.cursor.execute(IS_EMAIL_REGISTERED_QUERY, [email])
 
-            user = self.cursor.fetchone()
+            email = self.cursor.fetchone()
 
-            if user:
+            if email:
                 return True
             else:
                 return False
+
+        except mysql.connector.errors as error:
+            raise Exception(
+                f"Error while checking if a email registered, with MySQL,\n"
+                f"Error: {error}"
+            )
+        except Exception as error:
+            logger.error(error)
+            raise error
+
+    def is_user_registered(self, email: str, password: str) -> bool:
+        try:
+            is_valid_password: bool = False
+
+            self.cursor.execute(IS_USER_REGISTERED_QUERY, [email])
+
+            user_password = self.cursor.fetchone()
+
+            if user_password:
+                is_valid_password = check_password_hash(user_password[0], password)
+
+            return is_valid_password
 
         except mysql.connector.errors as error:
             raise Exception(
@@ -72,9 +88,13 @@ class MysqlUtil:
                 f"Error: {error}"
             )
 
+        except Exception as error:
+            logger.error(error)
+            raise error
+
     def is_wifi_session_expired(self, email: str) -> bool:
         try:
-            self.cursor.execute(IS_WIFI_SESSION_EXPIRED_QUERY, (email,))
+            self.cursor.execute(IS_WIFI_SESSION_EXPIRED_QUERY, [email])
 
             is_expired: bool = self.cursor.fetchone() is None
             return is_expired
@@ -90,11 +110,14 @@ class MysqlUtil:
                 f"Error while checking WiFi session with MySQL,\n" f"Error: {error}"
             )
             raise error
+        except Exception as error:
+            logger.error(error)
+            raise error
 
     def register(self, full_name: str, email: str, hashed_password: str):
         try:
             self.cursor.execute(
-                INSERT_A_USER_QUERY, (full_name, email, hashed_password)
+                INSERT_A_USER_QUERY, [full_name, email, hashed_password]
             )
 
             self.connection.commit()
@@ -108,14 +131,17 @@ class MysqlUtil:
             raise Exception(
                 f"Error while creating a new user with MySQL,\n" f"Error: {error.msg}"
             )
+        except Exception as error:
+            logger.error(error)
+            raise error
 
     def add_credit_card(
-            self, card_number, expiration_month, expiration_year, hashed_cvv, email
+        self, card_number, expiration_month, expiration_year, hashed_cvv, email
     ):
         try:
             self.cursor.execute(
                 INSERT_CREDIT_CARD_BY_USER_ID_QUERY,
-                (email, card_number, expiration_month, expiration_year, hashed_cvv),
+                [email, card_number, expiration_month, expiration_year, hashed_cvv],
             )
 
             self.connection.commit()
@@ -133,13 +159,16 @@ class MysqlUtil:
                 f"Error while inserting credit card with MySQL,\n" f"Error: {error}"
             )
             raise error
+        except Exception as error:
+            logger.error(error)
+            raise error
 
     def start_wifi_session(
-            self, email: str, start_time: float, end_time: float, data_usage: int
+        self, email: str, start_time: float, end_time: float, data_usage: int
     ):
         try:
             self.cursor.execute(
-                INSERT_WIFI_SESSION_QUERY, (email, start_time, end_time, data_usage)
+                INSERT_WIFI_SESSION_QUERY, [email, start_time, end_time, data_usage]
             )
 
             self.connection.commit()
@@ -156,4 +185,7 @@ class MysqlUtil:
             logger.error(
                 f"Error while inserting WiFi session with MySQL,\n" f"Error: {error}"
             )
+            raise error
+        except Exception as error:
+            logger.error(error)
             raise error

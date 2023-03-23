@@ -67,7 +67,7 @@ paths:
                   message:
                     type: string
                     example: "User registered"
-                  is_user_registered:
+                  is_email_registered:
                     type: boolean
                     example: true
         '400':
@@ -169,8 +169,8 @@ paths:
                     example: User not registered
                   data:
                     type: object
-                    description: An object containing the is_user_registered parameter set to false.
-                    example: {"is_user_registered": false}
+                    description: An object containing the is_email_registered parameter set to false.
+                    example: {"is_email_registered": false}
         '409':
           description: Conflict. The user already has an active WiFi session.
           content:

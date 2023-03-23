@@ -49,4 +49,5 @@ INSERT_WIFI_SESSION_QUERY = (
     "VALUES (%s, %s, %s, %s)"
 )
 IS_WIFI_SESSION_EXPIRED_QUERY = "SELECT email FROM wifi_session WHERE email = %s"
-IS_USER_REGISTERED_QUERY = "SELECT * FROM users WHERE email = %s"
+IS_EMAIL_REGISTERED_QUERY = "SELECT * FROM users WHERE email = %s"
+IS_USER_REGISTERED_QUERY = "SELECT password FROM users WHERE email = %s"

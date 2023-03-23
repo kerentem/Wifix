@@ -1,7 +1,7 @@
 import re
 import validate_email as validate_email_package
 
-from exception import (
+from mysql_util.mysql_exception import (
     InvalidEmailException,
     InvalidPasswordException,
     InvalidCreditCardException,

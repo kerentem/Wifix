@@ -3,10 +3,10 @@ from typing import Optional
 import datetime
 from flask import Flask, request
 
-from backend.db_server.mysql.mysql_util import MysqlUtil
-from exception import InvalidUsernameException
+from mysql_util.mysql_util import MysqlUtil
+from mysql_util.mysql_exception import InvalidUsernameException
 from validation import validate_register_request, validate_credit_card
-from werkzeug.security import generate_password_hash
+from flask_bcrypt import generate_password_hash
 from utiles import make_db_server_response, HttpStatus
 
 db_server = Flask(__name__)
@@ -48,16 +48,19 @@ def login():
     data = request.get_json()
 
     email: str = data["email"]
+    password: str = data["password"]
 
-    is_user_registered_response = mysqlutil.is_user_registered(email=email)
+    is_user_registered_response: bool = mysqlutil.is_user_registered(
+        email=email, password=password
+    )
 
     if is_user_registered_response:
         response = make_db_server_response(
-            HttpStatus.OK, "User registered", {"is_user_registered": True}
+            HttpStatus.OK, "User registered", {"is_email_registered": True}
         )
     else:
         response = make_db_server_response(
-            HttpStatus.OK, "User not registered", {"is_user_registered": False}
+            HttpStatus.OK, "User not registered", {"is_email_registered": False}
         )
 
     return response
@@ -101,9 +104,9 @@ def start_wifi_session():
     end_time_in_min: int = data["end_time_in_min"]
     data_usage: Optional[int] = data.get("data_usage") if data.get("data_usage") else 0
 
-    is_user_registered_response = mysqlutil.is_user_registered(email)
+    _is_email_registered = mysqlutil.is_email_registered(email)
 
-    if not is_user_registered_response:
+    if not _is_email_registered:
         raise InvalidUsernameException("User not registered")
 
     if not mysqlutil.is_wifi_session_expired(email):
@@ -135,6 +138,10 @@ def start_wifi_session():
 def is_wifi_session_expired_endpoint():
     email = request.args["email"]
 
+    _is_email_registered: bool = mysqlutil.is_email_registered(email)
+    if not _is_email_registered:
+        raise InvalidUsernameException("User not registered")
+
     is_expired = mysqlutil.is_wifi_session_expired(email)
 
     if is_expired:
@@ -157,6 +164,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
