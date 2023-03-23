@@ -54,8 +54,12 @@ paths:
                 email:
                   type: string
                   example: john.doe@example.com
+                password:
+                  type: string
+                  example: Aa123456789
               required:
                 - email
+                - password
       responses:
         '200':
           description: User registration status
