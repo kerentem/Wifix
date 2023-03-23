@@ -18,11 +18,10 @@ class HttpStatus(Enum):
     SERVICE_UNAVAILABLE = 503
 
 
-def make_db_server_response(status_code: HttpStatus, message: str, data: Dict[Any, Any]):
-    response = {
-        'message': message,
-        'data': data
-    }
+def make_db_server_response(
+    status_code: HttpStatus, message: str, data: Dict[Any, Any]
+):
+    response = {"message": message, "data": data}
     return jsonify(response), status_code.value
 
 
@@ -33,17 +32,17 @@ def send_welcome_email():
 
     # Define email contents
     sender_email = SENDER_EMAIL
-    receiver_email = 'bar_sela@gmail.com'
-    password = 'bs52951998'
+    receiver_email = "bar_sela@gmail.com"
+    password = "bs52951998"
     message = MIMEMultipart()
-    message['From'] = sender_email
-    message['To'] = receiver_email
-    message['Subject'] = 'Welcome to our website!'
-    body = 'Dear [Name],\n\nThank you for signing up for our website. We are thrilled to have you on board and hope you enjoy our services.\n\nBest regards,\n[Your Name]'
-    message.attach(MIMEText(body, 'plain'))
+    message["From"] = sender_email
+    message["To"] = receiver_email
+    message["Subject"] = "Welcome to our website!"
+    body = "Dear [Name],\n\nThank you for signing up for our website. We are thrilled to have you on board and hope you enjoy our services.\n\nBest regards,\n[Your Name]"
+    message.attach(MIMEText(body, "plain"))
 
     # Set up SMTP connection
-    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server = smtplib.SMTP("smtp.gmail.com", 587)
     server.starttls()
     server.login(sender_email, password)
 
