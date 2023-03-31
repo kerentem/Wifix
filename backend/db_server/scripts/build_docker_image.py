@@ -34,7 +34,7 @@ tag = f"barsela/wifix_db_server:{new_version}"
 
 logger.info("Building docker image")
 
-subprocess.run(["docker", "build", "-t", tag, "-f", dockerfile_path, "."])
+subprocess.run(["docker", "build", "--platform", "linux/amd64", "-t", tag, "-f", dockerfile_path, "."])
 
 # Update the version.py file with the new version number
 with open(docker_image_version_path, "w") as f:
