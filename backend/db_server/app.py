@@ -8,8 +8,11 @@ from mysql_util.mysql_exception import InvalidUsernameException
 from validation import validate_register_request, validate_credit_card
 from flask_bcrypt import generate_password_hash
 from utiles import make_db_server_response, HttpStatus
+from flask_cors import CORS
 
 db_server = Flask(__name__)
+
+CORS(db_server)
 
 RDS_ENDPOINT = os.environ["RDS_ENDPOINT"]
 RDS_USERNAME = os.environ["RDS_USERNAME"]
