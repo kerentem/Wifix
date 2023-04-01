@@ -1,11 +1,20 @@
 import psutil
 import json
 from selenium import webdriver
+import requests
+from flask import Flask, request, jsonify
 from selenium.webdriver.common.by import By
 
 driver = webdriver.Chrome()
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "admin"
+
+request_number = []
+BASE_URL = "http://{}:{}/{}"
+hostName = "0.0.0.0"
+serverPort = 9285
+
+app = Flask(__name__)
 
 
 def init_and_login():
@@ -61,7 +70,8 @@ def print_general_packets_data():
     print("Total internet data used: ", total_data_used, " packets")
 
 
-def get_wireless_customer_data() -> dict:
+@app.route("/data_feed", methods=["GET"])
+def get_wireless_customer_data():
     driver.switch_to.default_content()
     driver.switch_to.frame("bottomLeftFrame")
     driver.find_element(By.XPATH, '//*[@id="a7"]').click()
@@ -81,7 +91,7 @@ def get_wireless_customer_data() -> dict:
                                                       '//*[@id="autoWidth"]/tbody/tr[5]/td/table/tbody/tr[{}]/td[5]'.
                                                       format(connection_index)).text
         result_usage_dict["{}".format(connection)] = [connection_recieved_packets, connection_sent_packets]
-    return result_usage_dict
+    return jsonify(result_usage_dict), 200
 
 
 def create_output_json(data_usage):
@@ -91,8 +101,7 @@ def create_output_json(data_usage):
 
 if __name__ == '__main__':
     init_and_login()
-    limit_upload_download_speed(download_speed='2049', upload_speed='513')
-    print_general_packets_data()
-    wireless_data: dict = get_wireless_customer_data()
-    create_output_json(data_usage=wireless_data)
+    app.run(host="0.0.0.0", port=serverPort)
+    #limit_upload_download_speed(download_speed='2049', upload_speed='513')
+    #print_general_packets_data()
     driver.quit()
