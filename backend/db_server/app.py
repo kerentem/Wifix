@@ -1,13 +1,11 @@
 import os
-from typing import Optional
-import datetime
 from flask import Flask, request
 
+from endpoints.manager_endpoints.endpoints import Admin
+from endpoints.user_endpoints.endpoints import User
+from utiles import ADMIN_ENDPOINTS, USER_ENDPOINTS
 from mysql_util.mysql_util import MysqlUtil
 from mysql_util.mysql_exception import InvalidUsernameException
-from validation import validate_register_request, validate_credit_card
-from flask_bcrypt import generate_password_hash
-from utiles import make_db_server_response, HttpStatus
 from flask_cors import CORS
 
 db_server = Flask(__name__)
@@ -20,143 +18,97 @@ RDS_PASSWORD = os.environ["RDS_PASSWORD"]
 RDS_PORT = 3306
 DATABASE = "wifix_db"
 
-mysqlutil = MysqlUtil(RDS_USERNAME, RDS_PASSWORD, RDS_ENDPOINT, DATABASE, RDS_PORT)
 
+@db_server.before_request
+def is_valid_request():
+    if request.path != ADMIN_ENDPOINTS.SET_NEW_TOKEN:
+        if request.method == "POST":
+            email: str = request.json["email"]
+        elif request.method == "GET":
+            email: str = request.args["email"]
+        else:
+            raise Exception("We are supporting GET/POST methods")
 
-@db_server.route("/register", methods=["POST"])
-def register():
-    # Get the user's registration information from the request
+        if ADMIN_ENDPOINTS.ADMIN in request.path:
+            is_valid = admin.is_valid_token(request.json)
+            if not is_valid:
+                raise Exception("Please insert the right company token")
+
+        if request.path not in [USER_ENDPOINTS.REGISTER,
+                                USER_ENDPOINTS.LOGIN,
+                                ADMIN_ENDPOINTS.REGISTER,
+                                ADMIN_ENDPOINTS.LOGIN,]:
+
+            _is_email_registered: bool = mysqlutil.is_email_registered(email)
+            if not _is_email_registered:
+                raise InvalidUsernameException("User not registered")
+
+@db_server.route(USER_ENDPOINTS.REGISTER, methods=["POST"])
+def user_register():
     data = request.get_json()
-
-    full_name: str = data["full_name"]
-    password: str = data["password"]
-    email: str = data["email"]
-
-    validate_register_request(full_name, password, email)
-
-    hashed_password: str = generate_password_hash(password)
-
-    mysqlutil.register(
-        full_name=full_name, email=email, hashed_password=hashed_password
-    )
-
-    msg = "User registered successfully"
-    response = make_db_server_response(HttpStatus.OK, msg, {})
-
+    response = user.register(data)
     return response
 
 
-@db_server.route("/login", methods=["POST"])
-def login():
+@db_server.route(USER_ENDPOINTS.LOGIN, methods=["POST"])
+def user_login():
     data = request.get_json()
-
-    email: str = data["email"]
-    password: str = data["password"]
-
-    is_user_registered_response: bool = mysqlutil.is_user_registered(
-        email=email, password=password
-    )
-
-    if is_user_registered_response:
-        response = make_db_server_response(
-            HttpStatus.OK, "User registered", {"is_email_registered": True}
-        )
-    else:
-        response = make_db_server_response(
-            HttpStatus.OK, "User not registered", {"is_email_registered": False}
-        )
-
+    response = user.login(data)
     return response
 
 
-@db_server.route("/add_card", methods=["POST"])
+@db_server.route(USER_ENDPOINTS.ADD_CARD, methods=["POST"])
 def add_card():
-    # Get credit card information from form
     data = request.get_json()
-
-    card_number: str = data["card_number"]
-    expiration_month: str = data["exp_month"]
-    expiration_year: str = data["exp_year"]
-    cvv: str = data["cvv"]
-    email: str = data["email"]
-
-    validate_credit_card(card_number)
-
-    # Hash CVV before storing in database
-    hashed_cvv = generate_password_hash(str(cvv))
-
-    mysqlutil.add_credit_card(
-        card_number=card_number,
-        expiration_month=expiration_month,
-        expiration_year=expiration_year,
-        hashed_cvv=hashed_cvv,
-        email=email,
-    )
-
-    msg = "User added credit card successfully"
-    response = make_db_server_response(HttpStatus.OK, msg, {})
-
+    response = user.add_card(data)
     return response
 
 
-@db_server.route("/wifi_session/start", methods=["POST"])
+@db_server.route(USER_ENDPOINTS.START_WIFI_SESSION, methods=["POST"])
 def start_wifi_session():
     data = request.get_json()
-
-    email: str = data["email"]
-    end_time_in_min: int = data["end_time_in_min"]
-    data_usage: Optional[int] = data.get("data_usage") if data.get("data_usage") else 0
-
-    _is_email_registered = mysqlutil.is_email_registered(email)
-
-    if not _is_email_registered:
-        raise InvalidUsernameException("User not registered")
-
-    if not mysqlutil.is_wifi_session_expired(email):
-        raise Exception("There is a wifi session for the user")
-
-    if data.get("start_time"):
-        date_start_str = data["start_time"]["date"]
-        time_start_str = data["start_time"]["time"]
-        start_time = datetime.datetime.strptime(
-            f"{date_start_str} {time_start_str}", "%Y-%m-%d %H:%M:%S"
-        )
-    else:
-        start_time: datetime = datetime.datetime.now()
-
-    end_time: datetime = start_time + datetime.timedelta(minutes=end_time_in_min)
-
-    start_time = start_time.timestamp()
-    end_time = end_time.timestamp()
-
-    mysqlutil.start_wifi_session(email, start_time, end_time, data_usage)
-
-    msg = f"Added WiFi session to user: {email} successfully"
-    response = make_db_server_response(HttpStatus.OK, msg, {})
-
+    response = user.start_wifi_session(data)
     return response
 
 
-@db_server.route("/wifi_session/is_expired", methods=["Get"])
-def is_wifi_session_expired_endpoint():
-    email = request.args["email"]
-
-    _is_email_registered: bool = mysqlutil.is_email_registered(email)
-    if not _is_email_registered:
-        raise InvalidUsernameException("User not registered")
-
-    is_expired = mysqlutil.is_wifi_session_expired(email)
-
-    if is_expired:
-        msg = f"Wifi session is expired for email: {email}"
-    else:
-        msg = f"Wifi session is not expired for email: {email}"
-
-    data = {"is_expired": is_expired}
-
-    response = make_db_server_response(HttpStatus.OK, msg, data)
-
+@db_server.route(USER_ENDPOINTS.IS_EXPIRED_WIFI_SESSION, methods=["Get"])
+def is_wifi_session_expired_endpoint(self, data):
+    data = request.get_json()
+    response = admin.register(data)
     return response
+
+
+@db_server.route(ADMIN_ENDPOINTS.REGISTER, methods=["POST"])
+def admin_register():
+    data = request.get_json()
+    response = admin.register(data)
+    return response
+
+
+@db_server.route(ADMIN_ENDPOINTS.LOGIN, methods=["POST"])
+def admin_login():
+    data = request.get_json()
+    response = admin.login(data)
+    return response
+
+
+@db_server.route(ADMIN_ENDPOINTS.GET_CURRENT_BALANCE, methods=["POST"])
+def admin_get_current_balance():
+    data = request.get_json()
+    response = admin.get_current_balance(data)
+    return response
+
+
+@db_server.route(ADMIN_ENDPOINTS.SET_NEW_TOKEN, methods=["POST"])
+def set_new_token():
+    data = request.get_json()
+    response = admin.set_new_token(data)
+    return response
+
+
+mysqlutil = MysqlUtil(RDS_USERNAME, RDS_PASSWORD, RDS_ENDPOINT, DATABASE, RDS_PORT)
+user = User(mysqlutil)
+admin = Admin(mysqlutil)
 
 
 def main():

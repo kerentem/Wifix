@@ -16,7 +16,29 @@ class HttpStatus(Enum):
 
 
 def make_db_server_response(
-    status_code: HttpStatus, message: str, data: Dict[Any, Any]
+        status_code: HttpStatus, message: str, data: Dict[Any, Any]
 ):
     response = {"message": message, "data": data}
     return jsonify(response), status_code.value
+
+
+class Const:
+    DATE_FORMAT = "%d/%m/%Y"
+
+
+class USER_ENDPOINTS:
+    LOGIN = "/login"
+    REGISTER = "/register"
+    ADD_CARD = "/add_card"
+    START_WIFI_SESSION = "/wifi_session/start"
+    IS_EXPIRED_WIFI_SESSION = "/wifi_session/is_expired"
+
+
+class ADMIN_ENDPOINTS:
+    ADMIN = "/admin"
+    LOGIN = f"{ADMIN}/login"
+    REGISTER = f"{ADMIN}/register"
+    GET_CURRENT_BALANCE = f"{ADMIN}/get_current_balance"
+    START_WIFI_SESSION = f"{ADMIN}/wifi_session/start"
+    IS_EXPIRED_WIFI_SESSION = f"{ADMIN}/wifi_session/is_expired"
+    SET_NEW_TOKEN = f"{ADMIN}/set_new_token"

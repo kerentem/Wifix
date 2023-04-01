@@ -1,5 +1,31 @@
+MySQL_CREATE_COMPANIES_TOKENS_TABLE_QUERY = (
+    "CREATE TABLE IF NOT EXISTS companies_tokens ("
+    "company_name VARCHAR(255) PRIMARY KEY,"
+    "token VARCHAR(255) NOT NULL"
+    ")"
+)
+
+INSERT_COMPANY_TOKEN_QUERY = (
+    "INSERT INTO companies_tokens "
+    "(company_name, token)"
+    "VALUES (%s, %s)"
+)
+IS_VALID_COMPANY_TOKEN_QUERY = "SELECT token " \
+                               "FROM companies_tokens " \
+                               "WHERE company_name = %s"
+
+
 MySQL_CREATE_USERS_TABLE_QUERY = (
     "CREATE TABLE IF NOT EXISTS users ("
+    "full_name VARCHAR(255) NOT NULL,"
+    "email VARCHAR(255) PRIMARY KEY,"
+    "password VARCHAR(255) NOT NULL,"
+    "created_at TIMESTAMP DEFAULT NOW()"
+    ")"
+)
+
+MySQL_CREATE_ADMINS_TABLE_QUERY = (
+    "CREATE TABLE IF NOT EXISTS admins ("
     "full_name VARCHAR(255) NOT NULL,"
     "email VARCHAR(255) PRIMARY KEY,"
     "password VARCHAR(255) NOT NULL,"
@@ -28,6 +54,24 @@ MySQL_CREATE_WIFI_SESSION_TABLE_QUERY = (
     ");"
 )
 
+MySQL_CREATE_PAYMENT_TABLE_QUERY = (
+    "CREATE TABLE IF NOT EXISTS payments ("
+    "email VARCHAR(255) REFERENCES users(email),"
+    "price INT NOT NULL, "
+    "created_at BIGINT(20) NOT NULL, "
+    "FOREIGN KEY (email) REFERENCES users(email) ON DELETE RESTRICT ON UPDATE RESTRICT"
+    ");"
+)
+
+MySQL_CREATE_ADMINS_TABLE_QUERY = (
+    "CREATE TABLE IF NOT EXISTS admins ("
+    "full_name VARCHAR(255) NOT NULL,"
+    "email VARCHAR(255) PRIMARY KEY,"
+    "password VARCHAR(255) NOT NULL,"
+    "created_at TIMESTAMP DEFAULT NOW()"
+    ")"
+)
+
 MYSQL_WIFI_SESSION_DELETE_EXPIRED_EVENT_QUERY = (
     "CREATE EVENT IF NOT EXISTS wifi_session_cleanup "
     "ON SCHEDULE EVERY 1 MINUTE "
@@ -35,8 +79,11 @@ MYSQL_WIFI_SESSION_DELETE_EXPIRED_EVENT_QUERY = (
     "DELETE FROM wifi_session WHERE end_time < unix_timestamp(now());"
 )
 
-INSERT_A_USER_QUERY = (
+INSERT_USER_QUERY = (
     "INSERT INTO users (full_name, email, password) " "VALUES (%s, %s, %s)"
+)
+INSERT_ADMIN_QUERY = (
+    "INSERT INTO admins (full_name, email, password) " "VALUES (%s, %s, %s)"
 )
 INSERT_CREDIT_CARD_BY_USER_ID_QUERY = (
     "INSERT INTO credit_card "
@@ -48,6 +95,19 @@ INSERT_WIFI_SESSION_QUERY = (
     "(email, start_time, end_time, data_usage)"
     "VALUES (%s, %s, %s, %s)"
 )
+REMOVE_WIFI_SESSION_QUERY = ("DELETE FROM wifi_session "
+                             "WHERE email = %s AND "
+                             "start_time = %s AND "
+                             "end_time = %s;")
+INSERT_PAYMENT_QUERY = (
+    "INSERT INTO payments "
+    "(email, price, created_at)"
+    "VALUES (%s, %s, %s)"
+)
 IS_WIFI_SESSION_EXPIRED_QUERY = "SELECT email FROM wifi_session WHERE email = %s"
 IS_EMAIL_REGISTERED_QUERY = "SELECT * FROM users WHERE email = %s"
 IS_USER_REGISTERED_QUERY = "SELECT password FROM users WHERE email = %s"
+IS_ADMIN_REGISTERED_QUERY = "SELECT password FROM admins WHERE email = %s"
+GET_CURRENT_BALANCE_QUERY = "SELECT SUM(price) " \
+                            "FROM payments " \
+                            "WHERE created_at >=  %s AND created_at <= %s;"
