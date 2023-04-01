@@ -20,20 +20,19 @@ export default function (props) {
     const changeAuthMode = () => {
         setAuthMode(authMode === "signin" ? "signup" : "signin")
     }
-    const submitSignIn = (event) => {
+    const submitSignIn =  (event) => {
         event.preventDefault();
         console.log("before")
-        axios.post('https://jsonplaceholder.typicde.com' , {
-            "username": "Bar Sela",
+        const res = axios.post('http://localhost:8080/login', {
             "password": "Aa12345678",
             "email": "bs52951@gmail.com"
         })
-            .then( (response) => {
-                console.log("then")
+            .then((response) => {
+                console.log(res)
                 navigate("/menu");
             })
-            .catch( (error) => {
-                console.log("error")
+            .catch((error) => {
+                console.log(res)
                 const popup = document.getElementById("myPopup");
                 popup.classList.toggle("show");
             })
@@ -41,9 +40,8 @@ export default function (props) {
 
     const submitSignUp = (event) => {
         event.preventDefault();
-        console.log("before")
-         axios.post('https://jsonplaceholder.typicode.com/users' , {
-            "username": "Bar Sela",
+         axios.post('https://localhost:8080/register' , {
+            "full_name": "Bar Sela",
             "password": "Aa12345678",
             "email": "bs52951@gmail.com"
         })
@@ -52,7 +50,7 @@ export default function (props) {
                 navigate("/menu");
             })
             .catch( (error) => {
-                console.log("error")
+
                 const popup = document.getElementById("myPopup");
                 popup.classList.toggle("show");
                 setTimeout(() => {}, 3000);

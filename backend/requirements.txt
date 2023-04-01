@@ -1,5 +1,5 @@
 flask
-Flask-Mail
-werkzeug
+flask-cors
 validate_email
 mysql-connector-python
+Flask-Bcrypt

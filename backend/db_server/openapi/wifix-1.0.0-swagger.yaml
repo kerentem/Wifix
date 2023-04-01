@@ -1,0 +1,243 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: WiFix API
+servers:
+  - url: http://18.200.177.9:8080
+
+paths:
+  /register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                full_name:
+                  type: string
+                password:
+                  type: string
+                email:
+                  type: string
+                  format: email
+              required:
+                - full_name
+                - password
+                - email
+      responses:
+        '200':
+          description: User registered successfully
+        '400':
+          description: Bad request - missing required fields
+        '409':
+          description: Conflict - email already registered
+        '500':
+          description: Internal server error
+          
+  /login:
+    post:
+      summary: Check if a user is registered
+      description: |
+        This endpoint checks if a user is registered in the system by their email address.
+      requestBody:
+        description: User's email address
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: john.doe@example.com
+                password:
+                  type: string
+                  example: Aa123456789
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: User registration status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User registered"
+                  is_email_registered:
+                    type: boolean
+                    example: true
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid request: missing email"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+  /wifi_session/start:
+    post:
+      summary: Start a new WiFi session for a user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: The email address of the user.
+                  example: user@example.com
+                end_time_in_min:
+                  type: integer
+                  description: The duration of the WiFi session in minutes.
+                  example: 60
+                data_usage:
+                  type: integer
+                  description: The amount of data used in the WiFi session in bytes.
+                  example: 5000000
+                start_time:
+                  type: object
+                  description: The start time of the WiFi session.
+                  properties:
+                    date:
+                      type: string
+                      description: The date of the start time in YYYY-MM-DD format.
+                      example: 2023-03-22
+                    time:
+                      type: string
+                      description: The time of the start time in HH:MM:SS format.
+                      example: 14:30:00
+      responses:
+        '200':
+          description: The WiFi session was started successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating that the WiFi session was started successfully.
+                    example: Added WiFi session to user- user@example.com successfully
+                  data:
+                    type: object
+                    description: An empty object.
+                    example: {}
+        '400':
+          description: Bad request. The request was missing required parameters or contained invalid values.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating that the request was invalid.
+                    example: Invalid request. Please provide valid parameters.
+                  data:
+                    type: object
+                    description: An empty object.
+                    example: {}
+        '401':
+          description: Unauthorized. The user is not registered.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating that the user is not registered.
+                    example: User not registered
+                  data:
+                    type: object
+                    description: An object containing the is_email_registered parameter set to false.
+                    example: {"is_email_registered": false}
+        '409':
+          description: Conflict. The user already has an active WiFi session.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating that the user already has an active WiFi session.
+                    example: There is a wifi session for the user
+                  data:
+                    type: object
+                    description: An empty object.
+                    example: {}
+        '500':
+          description: Internal server error. An error occurred while processing the request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating that an error occurred while processing the request.
+                    example: An error occurred while starting the WiFi session.
+                  data:
+                    type: object
+                    description: An empty object.
+                    example: {}
+
+  /wifi_session/is_expired:
+    get:
+      summary: Check if WiFi session is expired for a user
+      parameters:
+        - in: query
+          name: email
+          required: true
+          schema:
+            type: string
+          description: The email of the user to check the WiFi session for
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message about whether the WiFi session is expired or not
+                  data:
+                    type: object
+                    properties:
+                      is_expired:
+                        type: boolean
+                        description: Whether the WiFi session is expired or not
+                example:
+                  message: Wifi session is expired for email- example@example.com
+                  data:
+                    is_expired: true
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
