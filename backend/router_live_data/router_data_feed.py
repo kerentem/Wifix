@@ -96,8 +96,9 @@ def get_wireless_customer_data():
 
 
 @app.route("/live_users", methods=["GET"])
-def get_wireless_customer_data():
-    return jsonify(LIVE_USERS), 200
+def get_amount_users():
+    result = {"result": LIVE_USERS}
+    return jsonify(result), 200
 
 
 def create_output_json(data_usage):
