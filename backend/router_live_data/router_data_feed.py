@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 driver = webdriver.Chrome()
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "admin"
-
+LIVE_USERS: int = 0
 request_number = []
 BASE_URL = "http://{}:{}/{}"
 hostName = "0.0.0.0"
@@ -72,26 +72,32 @@ def print_general_packets_data():
 
 @app.route("/data_feed", methods=["GET"])
 def get_wireless_customer_data():
+    global LIVE_USERS
     driver.switch_to.default_content()
     driver.switch_to.frame("bottomLeftFrame")
     driver.find_element(By.XPATH, '//*[@id="a7"]').click()
     driver.find_element(By.XPATH, '//*[@id="a12"]').click()
     driver.switch_to.default_content()
     driver.switch_to.frame("mainFrame")
-    amount_connected_devices = driver.find_element(By.XPATH, '//*[@id="autoWidth"]/tbody/tr[3]/td[2]').text
-    amount_range = range(int(amount_connected_devices))
+    LIVE_USERS = driver.find_element(By.XPATH, '//*[@id="autoWidth"]/tbody/tr[3]/td[2]').text
+    amount_range = range(int(LIVE_USERS))
     result_usage_dict: dict = {}
     for connection in amount_range:
         connection_index: int = 2 + connection
-        connection_recieved_packets = driver.find_element(By.XPATH, '//*[@id="autoWidth"]/tbody/tr['
+        connection_received_packets = driver.find_element(By.XPATH, '//*[@id="autoWidth"]/tbody/tr['
                                                                     '5]/td/table/tbody/tr[{}]/td[4]'.
                                                           format(connection_index)).text
 
         connection_sent_packets = driver.find_element(By.XPATH,
                                                       '//*[@id="autoWidth"]/tbody/tr[5]/td/table/tbody/tr[{}]/td[5]'.
                                                       format(connection_index)).text
-        result_usage_dict["{}".format(connection)] = [connection_recieved_packets, connection_sent_packets]
+        result_usage_dict["{}".format(connection)] = [connection_received_packets, connection_sent_packets]
     return jsonify(result_usage_dict), 200
+
+
+@app.route("/live_users", methods=["GET"])
+def get_wireless_customer_data():
+    return jsonify(LIVE_USERS), 200
 
 
 def create_output_json(data_usage):
