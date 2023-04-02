@@ -48,3 +48,5 @@ subprocess.run(["docker", "login", "-u", DOCKER_USERNAME, "-p", DOCKER_PASSWORD]
 # Push the Docker image to Docker Hub
 logger.info("Pushing to docker hub")
 subprocess.run(["docker", "push", tag])
+logger.info(f"Pushed image: {tag}")
+

@@ -1,5 +1,6 @@
 flask
 flask-cors
 validate_email
-mysql-connector-python
 Flask-Bcrypt
+sqlalchemy
+pymysql
