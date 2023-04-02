@@ -120,7 +120,7 @@ admin = Admin(db_handler)
 def main():
     db_handler.create_all()
     db_handler.create_events()
-    db_server.run(debug=True, port=8080, host="0.0.0.0")
+    db_server.run(debug=False, port=8080, host="0.0.0.0")
 
 
 if __name__ == "__main__":
