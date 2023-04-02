@@ -1,19 +1,15 @@
 import logging
+
+from flask_bcrypt import check_password_hash
 from sqlalchemy import func, QueuePool, create_engine, text
 from sqlalchemy.exc import NoResultFound, IntegrityError
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from werkzeug.security import generate_password_hash, check_password_hash
 
-from backend.db_server.mysql_util.mysql_exception import *
-from backend.db_server.mysql_util.mysql_query import *
-from backend.db_server.sqlalchemy_handler.db_models import User, Admin, WifiSession, CreditCard, \
+from sqlalchemy_handler.db_models import Base, User, Admin, WifiSession, CreditCard, \
     Payment, CompanyToken
 import datetime
 
 logger = logging.getLogger(__name__)
-
-Base = declarative_base()
 
 
 class DBHandler:
@@ -33,12 +29,15 @@ class DBHandler:
         return self.Session()
 
     def create_all(self):
+        logger.info("Creating tables")
         Base.metadata.create_all(self.engine)
 
     def drop_all(self):
+        logger.info("Dropping tables")
         Base.metadata.drop_all(self.engine)
 
     def create_events(self):
+        logger.info("Creating wifi_session_cleanup event")
         with self.engine.connect() as conn:
             try:
                 query = text(
@@ -63,9 +62,8 @@ class DBHandler:
 
         return user is not None
 
-    def register(self, full_name: str, email: str, password: str, is_admin: bool = False):
+    def register(self, full_name: str, email: str, hashed_password: str, is_admin: bool = False):
         session = self.get_session()
-        hashed_password = generate_password_hash(password)
 
         if is_admin:
             user = Admin(full_name=full_name, email=email, hashed_password=hashed_password)

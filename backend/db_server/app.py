@@ -1,6 +1,7 @@
 import os
-from flask import Flask, request
-from backend.db_server.sqlalchemy_handler.db_client import DBHandler
+from flask import Flask, request, Response
+
+from sqlalchemy_handler.db_client import DBHandler
 from endpoints.manager_endpoints.endpoints import Admin
 from endpoints.user_endpoints.endpoints import User
 from utiles import ADMIN_ENDPOINTS, USER_ENDPOINTS
@@ -21,7 +22,9 @@ DATABASE = "wifix_db"
 @db_server.before_request
 def is_valid_request():
     if request.path != ADMIN_ENDPOINTS.SET_NEW_TOKEN:
-        if request.method == "POST":
+        if request.method.lower() == "options":
+            return Response()
+        elif request.method == "POST":
             email: str = request.json["email"]
         elif request.method == "GET":
             email: str = request.args["email"]

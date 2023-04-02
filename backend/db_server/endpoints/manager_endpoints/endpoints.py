@@ -2,8 +2,8 @@ import uuid
 from datetime import datetime
 from flask_bcrypt import generate_password_hash
 
-from backend.db_server.utiles import make_db_server_response, HttpStatus, Const
-from backend.db_server.validation import validate_register_request, validate_datetime
+from utiles import make_db_server_response, HttpStatus, Const
+from validation import validate_register_request, validate_datetime
 
 
 class Admin:

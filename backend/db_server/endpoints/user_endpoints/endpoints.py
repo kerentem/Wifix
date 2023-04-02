@@ -1,10 +1,8 @@
 from typing import Optional
 import datetime
 from flask_bcrypt import generate_password_hash
-
-from backend.db_server.mysql_util.mysql_exception import InvalidUsernameException
-from backend.db_server.utiles import make_db_server_response, HttpStatus
-from backend.db_server.validation import validate_register_request, validate_credit_card
+from utiles import make_db_server_response, HttpStatus
+from validation import validate_register_request, validate_credit_card
 
 
 class User:

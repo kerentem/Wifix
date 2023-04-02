@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, TIMESTAMP, ForeignKey, BigInteger
+from sqlalchemy import Column, Integer, String, Float, TIMESTAMP, ForeignKey, BigInteger, text
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -8,8 +8,8 @@ class User(Base):
     __tablename__ = 'users'
     email = Column(String(100), nullable=False, primary_key=True)
     full_name = Column(String(100), nullable=False)
-    password = Column(String(128), nullable=False)
-    created_at = Column(TIMESTAMP, server_default='NOW()')
+    hashed_password = Column(String(128), nullable=False)
+    created_at = Column(TIMESTAMP, server_default=text('NOW()'))
 
 
 class Admin(Base):
@@ -17,7 +17,7 @@ class Admin(Base):
     email = Column(String(100), nullable=False, primary_key=True)
     full_name = Column(String(100), nullable=False)
     hashed_password = Column(String(128), nullable=False)
-    created_at = Column(TIMESTAMP, server_default='NOW()')
+    created_at = Column(TIMESTAMP, server_default=text('NOW()'))
 
 
 class CreditCard(Base):
