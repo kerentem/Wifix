@@ -208,7 +208,7 @@ class DBHandler:
     def set_company_token(self, company_name: str, hashed_token: str):
         session = self.get_session()
         try:
-            company_token = CompanyToken(company_name=company_name, token=hashed_token)
+            company_token = CompanyToken(company_name=company_name, hashed_token=hashed_token)
             session.add(company_token)
             session.commit()
 

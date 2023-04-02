@@ -24,28 +24,29 @@ def is_valid_request():
     if request.path != ADMIN_ENDPOINTS.SET_NEW_TOKEN:
         if request.method.lower() == "options":
             return Response()
-        elif request.method == "POST":
-            email: str = request.json["email"]
-        elif request.method == "GET":
-            email: str = request.args["email"]
-        else:
-            raise Exception("We are supporting GET/POST methods")
+        elif request.path != ADMIN_ENDPOINTS.SET_NEW_TOKEN:
+            if request.method == "POST":
+                email: str = request.json["email"]
+            elif request.method == "GET":
+                email: str = request.args["email"]
+            else:
+                raise Exception("We are supporting GET/POST methods")
 
-        is_admin: bool = ADMIN_ENDPOINTS.ADMIN in request.path
+            is_admin: bool = ADMIN_ENDPOINTS.ADMIN in request.path
 
-        if is_admin:
-            is_valid = admin.is_valid_token(request.json)
-            if not is_valid:
-                raise Exception("Please insert the right company token")
+            if is_admin:
+                is_valid = admin.is_valid_token(request.json)
+                if not is_valid:
+                    raise Exception("Please insert the right company token")
 
-        if request.path not in [USER_ENDPOINTS.REGISTER,
-                                USER_ENDPOINTS.LOGIN,
-                                ADMIN_ENDPOINTS.REGISTER,
-                                ADMIN_ENDPOINTS.LOGIN,]:
+            if request.path not in [USER_ENDPOINTS.REGISTER,
+                                    USER_ENDPOINTS.LOGIN,
+                                    ADMIN_ENDPOINTS.REGISTER,
+                                    ADMIN_ENDPOINTS.LOGIN,]:
 
-            _is_email_registered: bool = db_handler.is_email_registered(email, is_admin)
-            if not _is_email_registered:
-                raise InvalidUsernameException("User not registered")
+                _is_email_registered: bool = db_handler.is_email_registered(email, is_admin)
+                if not _is_email_registered:
+                    raise InvalidUsernameException("User not registered")
 
 @db_server.route(USER_ENDPOINTS.REGISTER, methods=["POST"])
 def user_register():

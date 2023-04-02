@@ -97,3 +97,6 @@ class Admin:
         self.db_handler.set_company_token(
             company_name=company_name, hashed_token=hashed_token
         )
+
+        response = make_db_server_response(HttpStatus.OK, "", {"token": token})
+        return response
