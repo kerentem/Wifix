@@ -1,5 +1,13 @@
+body {
+  background-color: #f2f2f2;
+  background-image: url('style/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
 .App {
-  background-color: white;
+
 }
 
 .Auth-form-container {

@@ -1,5 +1,5 @@
 import React from "react";
-import "./OurPlans.css"
+import "./style/OurPlans.css"
 const plans = [
     {
         id: 1,

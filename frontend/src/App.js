@@ -3,6 +3,8 @@ import "./App.css"
 import {BrowserRouter, Routes, Route, Navigate} from "react-router-dom"
 import Auth from "./Auth"
 import OurPlans from "./OurPlans";
+import CountdownTimer from "./Countdown";
+import ManagerScreen from "./Manager";
 
 function App() {
     return (
@@ -10,6 +12,8 @@ function App() {
             <Routes>
                 <Route path="/" element={<Auth />} />
                 <Route path="/menu" element={<OurPlans/>} />
+                <Route path="/countdown" element={<CountdownTimer/>} />
+                <Route path="/manage" element={<ManagerScreen/>} />
                 <Route path='*' element={<Navigate to='/' />} />
             </Routes>
         </BrowserRouter>

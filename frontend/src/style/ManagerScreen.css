@@ -1,0 +1,70 @@
+.manager-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 50px;
+}
+
+.manager-header {
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.manager-toggle {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.manager-toggle button {
+    background-color: #FFFFFF;
+    border: none;
+    border-radius: 20px;
+    color: #2B2D42;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0 10px;
+    padding: 10px 20px;
+}
+
+.manager-toggle button.active {
+    background-color: #2B2D42;
+    color: #FFFFFF;
+}
+
+.manager-chart {
+    margin-top: 30px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.manager-chart .apexcharts-tooltip {
+    background-color: #2B2D42;
+    color: #FFFFFF;
+    font-size: 14px;
+}
+
+.manager-chart .apexcharts-tooltip-series-group {
+    margin-bottom: 10px;
+}
+
+.manager-chart .apexcharts-tooltip-series-group > div:first-child {
+    margin-right: 10px;
+}
+
+.manager-chart .apexcharts-tooltip-y-group {
+    margin-left: 10px;
+}
+
+@media only screen and (max-width: 768px) {
+    .manager-header {
+        font-size: 24px;
+    }
+
+    .manager-chart {
+        width: 100%;
+        max-width: 500px;
+    }
+}

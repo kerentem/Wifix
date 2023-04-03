@@ -1,9 +1,8 @@
 import React, { useState } from "react"
 import axios from "axios";
-import logo from "./logo-no-background.png";
+import logo from "./style/logo-no-background.png";
 import "./App.css"
 import { useNavigate } from "react-router-dom";
-
 
 
 export default function (props) {
@@ -22,28 +21,27 @@ export default function (props) {
     }
     const submitSignIn =  (event) => {
         event.preventDefault();
-        console.log("before")
-        const res = axios.post('http://localhost:8080/login', {
-            "password": "Aa12345678",
-            "email": "bs52951@gmail.com"
+        axios.post('http://18.200.177.9:8080/login' , {
+            "password": password,
+            "email": mail
         })
-            .then((response) => {
-                console.log(res)
+            .then( (response) => {
                 navigate("/menu");
             })
-            .catch((error) => {
-                console.log(res)
+            .catch( (error) => {
+
                 const popup = document.getElementById("myPopup");
                 popup.classList.toggle("show");
+                setTimeout(() => {popup.classList.toggle("show");}, 3000);
             })
     }
 
     const submitSignUp = (event) => {
         event.preventDefault();
-         axios.post('https://localhost:8080/register' , {
-            "full_name": "Bar Sela",
-            "password": "Aa12345678",
-            "email": "bs52951@gmail.com"
+         axios.post('http://18.200.177.9:8080/register' , {
+            "full_name": name,
+            "password": password,
+            "email": mail
         })
             .then( (response) => {
                 console.log("then")
@@ -53,8 +51,7 @@ export default function (props) {
 
                 const popup = document.getElementById("myPopup");
                 popup.classList.toggle("show");
-                setTimeout(() => {}, 3000);
-                popup.classList.toggle("show");
+                setTimeout(() => {popup.classList.toggle("show");}, 3000);
             })
     }
 
