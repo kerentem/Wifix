@@ -34,7 +34,7 @@ tag = f"barsela/wifix_db_server:{new_version}"
 
 logger.info("Building docker image")
 
-subprocess.run(["docker", "build", "-t", tag, "-f", dockerfile_path, "."])
+subprocess.run(["docker", "build", "--platform", "linux/amd64", "-t", tag, "-f", dockerfile_path, "."])
 
 # Update the version.py file with the new version number
 with open(docker_image_version_path, "w") as f:
@@ -48,3 +48,5 @@ subprocess.run(["docker", "login", "-u", DOCKER_USERNAME, "-p", DOCKER_PASSWORD]
 # Push the Docker image to Docker Hub
 logger.info("Pushing to docker hub")
 subprocess.run(["docker", "push", tag])
+logger.info(f"Pushed image: {tag}")
+
