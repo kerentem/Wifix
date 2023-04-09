@@ -7,8 +7,8 @@ from validation import validate_register_request, validate_credit_card
 
 class User:
 
-    def __init__(self, mysqlutil):
-        self.mysqlutil = mysqlutil
+    def __init__(self, db_handler):
+        self.db_handler = db_handler
 
     def register(self, data):
         # Get the user's registration information from the request
@@ -20,7 +20,7 @@ class User:
 
         hashed_password: str = generate_password_hash(password)
 
-        self.mysqlutil.register(
+        self.db_handler.register(
             full_name=full_name, email=email, hashed_password=hashed_password
         )
 
@@ -33,7 +33,7 @@ class User:
         email: str = data["email"]
         password: str = data["password"]
 
-        is_user_registered_response: bool = self.mysqlutil.is_user_registered(
+        is_user_registered_response: bool = self.db_handler.is_user_registered(
             email=email, password=password
         )
 
@@ -60,7 +60,7 @@ class User:
         # Hash CVV before storing in database
         hashed_cvv = generate_password_hash(str(cvv))
 
-        self.mysqlutil.add_credit_card(
+        self.db_handler.add_credit_card(
             card_number=card_number,
             expiration_month=expiration_month,
             expiration_year=expiration_year,
@@ -79,7 +79,7 @@ class User:
         end_time_in_min: int = data["end_time_in_min"]
         data_usage: Optional[int] = data.get("data_usage") if data.get("data_usage") else 0
 
-        if not self.mysqlutil.is_wifi_session_expired(email):
+        if not self.db_handler.is_wifi_session_expired(email):
             raise Exception("There is a wifi session for the user")
 
         if data.get("start_time"):
@@ -97,11 +97,11 @@ class User:
         end_time = end_time.timestamp()
 
         # Inserting the data to the wifi_session table and payment table
-        self.mysqlutil.start_wifi_session(email, start_time, end_time, data_usage)
+        self.db_handler.start_wifi_session(email, start_time, end_time, data_usage)
         try:
-            self.mysqlutil.insert_payment(email, price)
+            self.db_handler.insert_payment(email, price)
         except Exception as e:
-            self.mysqlutil.remove_wifi_session(email, int(start_time), int(end_time))
+            self.db_handler.remove_wifi_session(email, int(start_time), int(end_time))
             raise e
 
         msg = f"Added WiFi session to user: {email} successfully"
@@ -112,11 +112,11 @@ class User:
     def is_wifi_session_expired_endpoint(self, data):
         email = data["email"]
 
-        _is_email_registered: bool = mysqlutil.is_email_registered(email)
+        _is_email_registered: bool = self.db_handler.is_email_registered(email)
         if not _is_email_registered:
             raise InvalidUsernameException("User not registered")
 
-        is_expired = mysqlutil.is_wifi_session_expired(email)
+        is_expired = self.db_handler.is_wifi_session_expired(email)
 
         if is_expired:
             msg = f"Wifi session is expired for email: {email}"

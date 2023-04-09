@@ -1,14 +1,15 @@
 import uuid
 from datetime import datetime
 from flask_bcrypt import generate_password_hash
+
 from utiles import make_db_server_response, HttpStatus, Const
 from validation import validate_register_request, validate_datetime
 
 
 class Admin:
 
-    def __init__(self, mysqlutil):
-        self.mysqlutil = mysqlutil
+    def __init__(self, db_handler):
+        self.db_handler = db_handler
 
     def register(self, data):
         full_name: str = data["full_name"]
@@ -21,7 +22,7 @@ class Admin:
 
         hashed_password: str = generate_password_hash(password)
 
-        self.mysqlutil.register(
+        self.db_handler.register(
             full_name=full_name, email=email, hashed_password=hashed_password
         )
 
@@ -34,7 +35,7 @@ class Admin:
         email: str = data["email"]
         password: str = data["password"]
 
-        is_user_registered_response: bool = self.mysqlutil.is_user_registered(
+        is_user_registered_response: bool = self.db_handler.is_user_registered(
             email=email, password=password
         )
 
@@ -59,7 +60,7 @@ class Admin:
         from_date_timestamp = datetime.strptime(from_date, Const.DATE_FORMAT).timestamp()
         to_date_timestamp = datetime.strptime(to_date, Const.DATE_FORMAT).timestamp()
 
-        current_balance = self.mysqlutil.get_current_balance(from_date_timestamp, to_date_timestamp)
+        current_balance = self.db_handler.get_current_balance(from_date_timestamp, to_date_timestamp)
 
         data = {"current_balance: ": current_balance,
                 "from_timestamp: ": from_date_timestamp,
@@ -73,7 +74,7 @@ class Admin:
         company_name: str = data["company_name"]
         token: str = data["token"]
 
-        is_valid_token_response: bool = self.mysqlutil.is_valid_company_token(
+        is_valid_token_response: bool = self.db_handler.is_valid_company_token(
             company_name=company_name, hashed_token=token
         )
 
@@ -93,6 +94,9 @@ class Admin:
         token: str = str(uuid.uuid4())
         hashed_token: str = generate_password_hash(token)
 
-        self.mysqlutil.set_company_token(
+        self.db_handler.set_company_token(
             company_name=company_name, hashed_token=hashed_token
         )
+
+        response = make_db_server_response(HttpStatus.OK, "", {"token": token})
+        return response
