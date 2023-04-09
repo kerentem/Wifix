@@ -1,5 +1,6 @@
 import psutil
 import json
+import socket
 from selenium import webdriver
 import requests
 from flask import Flask, request, jsonify
@@ -15,6 +16,20 @@ hostName = "0.0.0.0"
 serverPort = 9285
 
 app = Flask(__name__)
+
+
+@app.route("/user_ip", methods=["GET"])
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.255.255.255', 1))
+        IP = s.getsockname()[0]
+    except:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
 
 
 def init_and_login():
@@ -35,24 +50,54 @@ def init_and_login():
     driver.implicitly_wait(10)
 
 
-def limit_upload_download_speed(upload_speed, download_speed):
+@app.route("/change_speed", methods=['POST'])
+def limit_upload_download_speed():
+    input_json_object = request.get_json(force=True)
+    client_ip = input_json_object['client_ip']
+    upload_speed = input_json_object['upload_speed']
+    download_speed = input_json_object['download_speed']
     # Find the router's information
     driver.switch_to.frame("bottomLeftFrame")
-    driver.find_element(By.XPATH, '//*[@id="ol38"]').click()
+    driver.find_element(By.XPATH, '//*[@id="a38"]').click()
+    driver.find_element(By.XPATH, '//*[@id="ol40"]').click()
     driver.switch_to.default_content()
     driver.switch_to.frame("mainFrame")
-    egress_bandwidth_field = driver.find_element(By.XPATH,
-                                                 '/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[3]/td['
+    driver.find_element(By.XPATH, '//*[@id="autoWidth"]/tbody/tr[5]/td/input[1]').click()
+    ip_range = driver.find_element(By.XPATH,
+                                   '//*[@id="autoWidth"]/tbody/tr[3]/td/table/tbody/tr[2]/td[2]/input[1]')
+    ip_range.clear()
+    ip_range.send_keys(client_ip)
+    port_range_from = driver.find_element(By.XPATH,
+                                          '/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[3]/td[2]/input[1]')
+    port_range_from.clear()
+    port_range_from.send_keys(1)
+    port_range_to = driver.find_element(By.XPATH,
+                                        '/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[3]/td[2]/input[2]')
+    port_range_to.clear()
+    port_range_to.send_keys(8000)
+    egress_bandwidth_from = driver.find_element(By.XPATH,
+                                                '/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[6]/td['
+                                                '2]/input')
+    egress_bandwidth_from.clear()
+    egress_bandwidth_from.send_keys(1)
+    egress_bandwidth_to = driver.find_element(By.XPATH,
+                                              '/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[6]/td['
+                                              '3]/input')
+    egress_bandwidth_to.clear()
+    egress_bandwidth_to.send_keys(upload_speed)
+    ingress_bandwidth_from = driver.find_element(By.XPATH,
+                                                 '/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[7]/td['
                                                  '2]/input')
-    egress_bandwidth_field.clear()
-    egress_bandwidth_field.send_keys(upload_speed)
-    egress_bandwidth_field = driver.find_element(By.XPATH,
-                                                 '/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[4]/td['
-                                                 '2]/input')
-    egress_bandwidth_field.clear()
-    egress_bandwidth_field.send_keys(download_speed)
-    router_info = egress_bandwidth_field
-    print(router_info)
+    ingress_bandwidth_from.clear()
+    ingress_bandwidth_from.send_keys(1)
+    ingress_bandwidth_to = driver.find_element(By.XPATH,
+                                               '/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[7]/td['
+                                               '3]/input')
+    ingress_bandwidth_to.clear()
+    ingress_bandwidth_to.send_keys(download_speed)
+    driver.find_element(By.XPATH, '//*[@id="autoWidth"]/tbody/tr[5]/td/input[1]').click()
+    result = {"result": "SUCCESS"}
+    return jsonify(result), 200
 
 
 def print_general_packets_data():
@@ -107,8 +152,9 @@ def create_output_json(data_usage):
 
 
 if __name__ == '__main__':
+    res = get_ip()
     init_and_login()
     app.run(host="0.0.0.0", port=serverPort)
-    #limit_upload_download_speed(download_speed='2049', upload_speed='513')
-    #print_general_packets_data()
+    # limit_upload_download_speed(download_speed='2049', upload_speed='513')
+    # print_general_packets_data()
     driver.quit()
