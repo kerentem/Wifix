@@ -20,7 +20,9 @@ def validate_register_request(full_name: str, password: str, email: str):
 
 def validate_token(token):
     if token != "46d5d479-5a07-4767-9847-516f04d78fbd":
-        raise InvalidEmailException("Sorry, you need a valid token to register as admin")
+        raise InvalidEmailException(
+            "Sorry, you need a valid token to register as admin"
+        )
 
 
 def validate_full_name(full_name: str):
