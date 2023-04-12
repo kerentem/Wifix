@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Dict, Any
 
 from flask import jsonify
+import re
 
 
 class HttpStatus(Enum):
@@ -13,13 +14,6 @@ class HttpStatus(Enum):
     NOT_FOUND = 404
     SERVER_ERROR = 500
     SERVICE_UNAVAILABLE = 503
-
-
-def make_db_server_response(
-        status_code: HttpStatus, message: str, data: Dict[Any, Any]
-):
-    response = {"message": message, "data": data}
-    return jsonify(response), status_code.value
 
 
 class Const:
@@ -42,3 +36,10 @@ class ADMIN_ENDPOINTS:
     START_WIFI_SESSION = f"{ADMIN}/wifi_session/start"
     IS_EXPIRED_WIFI_SESSION = f"{ADMIN}/wifi_session/is_expired"
     SET_NEW_TOKEN = f"{ADMIN}/set_new_token"
+
+
+def make_db_server_response(
+    status_code: HttpStatus, message: str, data: Dict[Any, Any], error=None
+):
+    response = {"message": message, "data": data, "error": error}
+    return jsonify(response), status_code.value

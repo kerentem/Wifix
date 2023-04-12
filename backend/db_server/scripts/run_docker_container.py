@@ -1,34 +1,28 @@
 import os
-import re
 import subprocess
 
+from backend.db_server.docker_client.docker_utils import (
+    get_docker_image_version,
+    get_start_container_cmd,
+)
+from backend.db_server.logger_client import logger
+
+DOCKER_IMAGE_VERSION_PATH = "../docker_image_version/docker_image_version.py"
 RDS_ENDPOINT = os.environ["RDS_ENDPOINT"]
 RDS_USERNAME = os.environ["RDS_USERNAME"]
 RDS_PASSWORD = os.environ["RDS_PASSWORD"]
 
-container_name = "wifix_db_server_container"
-image_name = "barsela/wifix_db_server"
-docker_image_version_path = "../docker_image_version/docker_image_version.py"
 
-# Read the current version from version.py
-with open(docker_image_version_path, "r") as f:
-    version_file = f.read()
-current_version = re.search(
-    r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', version_file, re.MULTILINE
-).group(1)
+current_version = get_docker_image_version(DOCKER_IMAGE_VERSION_PATH)
 
-# Build the Docker command
-docker_cmd = (
-    f"docker run -p 8080:8080 "
-    f"--name {container_name}_{current_version} "
-    f"-e RDS_ENDPOINT={RDS_ENDPOINT} "
-    f"-e RDS_PASSWORD={RDS_PASSWORD} "
-    f"-e RDS_USERNAME={RDS_USERNAME} "
-    f"{image_name}:{current_version}"
+start_container_cmd = get_start_container_cmd(
+    RDS_ENDPOINT, RDS_USERNAME, RDS_PASSWORD, current_version
 )
 
 # Run the Docker command using subprocess
-result = subprocess.run(docker_cmd, shell=True, capture_output=True)
+result = subprocess.run(start_container_cmd, shell=True, capture_output=True)
 
 # Print the output
 print(result.stderr.decode())
+
+logger.info(f"Running docker container: {current_version}")
