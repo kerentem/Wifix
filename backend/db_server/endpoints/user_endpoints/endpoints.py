@@ -6,11 +6,14 @@ from validation import validate_register_request, validate_credit_card
 
 from welcome_email.email_client import EmailClient
 
+EMAIL: bool = False
+
 
 class User:
     def __init__(self, db_handler):
         self.db_handler = db_handler
-        #self.email_client = EmailClient()
+        if EMAIL:
+            self.email_client = EmailClient()
 
     def register(self, data):
         # Get the user's registration information from the request
@@ -27,7 +30,8 @@ class User:
                 full_name=full_name, email=email, hashed_password=hashed_password
             )
 
-            #self.email_client.send_email(to=email)
+            if EMAIL:
+                self.email_client.send_email(to=email)
 
             msg = "User registered successfully"
             response = make_db_server_response(HttpStatus.OK, msg, {})

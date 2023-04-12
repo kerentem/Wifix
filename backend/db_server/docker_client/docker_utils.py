@@ -32,7 +32,7 @@ def get_start_container_cmd(
     rds_endpoint: str, rds_username: str, rds_password: str, current_version: str
 ) -> str:
     start_container_cmd = (
-        f"docker run -p 8080:8080 "
+        f"docker run -d -p 8080:8080 "
         f"--name {CONTAINER_NAME.format(current_version)} "
         f"-e RDS_ENDPOINT={rds_endpoint} "
         f"-e RDS_PASSWORD={rds_password} "
