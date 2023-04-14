@@ -1,6 +1,7 @@
 import os
 from flask import Flask, request, Response
 
+from logger_client import logger
 from sqlalchemy_handler.db_client import DBHandler
 from endpoints.manager_endpoints.endpoints import Admin
 from endpoints.user_endpoints.endpoints import User
@@ -39,14 +40,19 @@ def is_valid_request():
                 if not is_valid:
                     raise Exception("Please insert the right company token")
 
-            if request.path not in [USER_ENDPOINTS.REGISTER,
-                                    USER_ENDPOINTS.LOGIN,
-                                    ADMIN_ENDPOINTS.REGISTER,
-                                    ADMIN_ENDPOINTS.LOGIN,]:
+            if request.path not in [
+                USER_ENDPOINTS.REGISTER,
+                USER_ENDPOINTS.LOGIN,
+                ADMIN_ENDPOINTS.REGISTER,
+                ADMIN_ENDPOINTS.LOGIN,
+            ]:
 
-                _is_email_registered: bool = db_handler.is_email_registered(email, is_admin)
+                _is_email_registered: bool = db_handler.is_email_registered(
+                    email, is_admin
+                )
                 if not _is_email_registered:
                     raise InvalidUsernameException("User not registered")
+
 
 @db_server.route(USER_ENDPOINTS.REGISTER, methods=["POST"])
 def user_register():
@@ -113,11 +119,22 @@ def set_new_token():
 
 db_handler = DBHandler(RDS_USERNAME, RDS_PASSWORD, RDS_ENDPOINT, DATABASE, RDS_PORT)
 
+
+@db_server.route(USER_ENDPOINTS.GET_END_SESSION_TIME, methods=["GET"])
+def get_end_session_time():
+    data = request.args
+    response = user.get_end_session_time(data)
+    return response
+
+
+db_handler = DBHandler(RDS_USERNAME, RDS_PASSWORD, RDS_ENDPOINT, DATABASE, RDS_PORT)
+
 user = User(db_handler)
 admin = Admin(db_handler)
 
 
 def main():
+    logger.info("Staring Flask WiFix DB server")
     db_handler.create_all()
     db_handler.create_events()
     db_server.run(debug=False, port=8080, host="0.0.0.0")

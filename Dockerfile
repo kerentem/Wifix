@@ -16,4 +16,4 @@ COPY .. .
 EXPOSE 8080
 
 # Start the Flask application
-CMD ["python", "backend/db_server/app.py"]
+CMD ["python3", "backend/db_server/app.py"]
