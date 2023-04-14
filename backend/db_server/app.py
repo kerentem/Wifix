@@ -119,6 +119,16 @@ def set_new_token():
 
 db_handler = DBHandler(RDS_USERNAME, RDS_PASSWORD, RDS_ENDPOINT, DATABASE, RDS_PORT)
 
+
+@db_server.route(USER_ENDPOINTS.GET_END_SESSION_TIME, methods=["GET"])
+def get_end_session_time():
+    data = request.args
+    response = user.get_end_session_time(data)
+    return response
+
+
+db_handler = DBHandler(RDS_USERNAME, RDS_PASSWORD, RDS_ENDPOINT, DATABASE, RDS_PORT)
+
 user = User(db_handler)
 admin = Admin(db_handler)
 

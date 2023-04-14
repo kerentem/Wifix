@@ -60,6 +60,6 @@ class WifiSession(Base):
     email = Column(
         String(255), ForeignKey("users.email"), nullable=False, primary_key=True
     )
-    start_time = Column(Float, nullable=False)
-    end_time = Column(Float, nullable=False)
+    start_time = Column(Integer, nullable=False)
+    end_time = Column(Integer, nullable=False)
     data_usage = Column(Integer, nullable=False)

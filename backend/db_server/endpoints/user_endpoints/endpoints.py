@@ -6,6 +6,8 @@ from validation import validate_register_request, validate_credit_card
 
 from welcome_email.email_client import EmailClient
 
+from sqlalchemy_handler.db_models import WifiSession
+
 EMAIL: bool = False
 
 
@@ -123,8 +125,8 @@ class User:
 
         end_time: datetime = start_time + datetime.timedelta(minutes=end_time_in_min)
 
-        start_time = start_time.timestamp()
-        end_time = end_time.timestamp()
+        start_time = int(start_time.timestamp())
+        end_time = int(end_time.timestamp())
 
         # Inserting the data to the wifi_session table and payment table
         try:
@@ -132,7 +134,7 @@ class User:
             try:
                 self.db_handler.insert_payment(email, price)
             except Exception as e:
-                self.db_handler.remove_wifi_session(email, int(start_time), int(end_time))
+                self.db_handler.remove_wifi_session(email, start_time, end_time)
 
                 error_response = make_db_server_response(HttpStatus.OK, "", {}, str(e))
                 return error_response
@@ -147,15 +149,9 @@ class User:
             return error_response
 
     def is_wifi_session_expired_endpoint(self, data):
-        email = data["email"]
+        email: str = data["email"]
 
         try:
-            _is_email_registered: bool = self.db_handler.is_email_registered(email)
-            if not _is_email_registered:
-                error_msg = "User not registered"
-                error_response = make_db_server_response(HttpStatus.OK, "", {}, error_msg)
-                return error_response
-
             is_expired = self.db_handler.is_wifi_session_expired(email)
 
             if is_expired:
@@ -168,6 +164,24 @@ class User:
             response = make_db_server_response(HttpStatus.OK, msg, data)
 
             return response
+
+        except Exception as e:
+            error_msg = str(e)
+            error_response = make_db_server_response(HttpStatus.OK, "", {}, error_msg)
+            return error_response
+
+    def get_end_session_time(self, data) -> float:
+        email: str = data["email"]
+
+        try:
+            wifi_session: WifiSession = self.db_handler.get_wifi_session_expired(email)
+
+            if wifi_session:
+                response = {"end_session_time_timestamp": wifi_session.end_time}
+                return make_db_server_response(HttpStatus.OK, "", response,)
+            else:
+                error_msg: str = "There isn't wifi session for the user"
+                return make_db_server_response(HttpStatus.OK, "", {}, error_msg)
 
         except Exception as e:
             error_msg = str(e)

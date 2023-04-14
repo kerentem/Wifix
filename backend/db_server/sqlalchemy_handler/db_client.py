@@ -1,9 +1,12 @@
+from typing import Optional
+
 from logger_client import logger
 
 from flask_bcrypt import check_password_hash
-from sqlalchemy import func, QueuePool, create_engine, text
+from sqlalchemy import func, QueuePool, create_engine, text, Row
 from sqlalchemy.exc import NoResultFound, IntegrityError
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql._typing import _TP
 
 from sqlalchemy_handler.db_models import (
     Base,
@@ -141,10 +144,13 @@ class DBHandler:
             else:
                 raise error
 
-    def is_wifi_session_expired(self, email: str) -> bool:
+    def get_wifi_session_expired(self, email: str) -> Optional[Row[_TP]]:
         session = self.get_session()
         result = session.query(WifiSession).filter_by(email=email).first()
-        is_expired: bool = result is None
+        return result
+
+    def is_wifi_session_expired(self, email: str) -> bool:
+        is_expired: bool = self.get_wifi_session_expired(email) is None
         return is_expired
 
     def start_wifi_session(
