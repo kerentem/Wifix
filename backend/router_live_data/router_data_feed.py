@@ -1,8 +1,6 @@
 import psutil
 import json
-import socket
 from selenium import webdriver
-import requests
 from flask import Flask, request, jsonify
 from selenium.webdriver.common.by import By
 
@@ -18,18 +16,22 @@ serverPort = 9285
 app = Flask(__name__)
 
 
+@app.route("/")
+def hello():
+    return "Hello Geeks!!"
+
+
+@app.route("/get_my_ip", methods=["GET"])
+def get_my_ip():
+    client_ip = request.environ.get('REMOTE_ADDR')
+    # return ['Your IP is: {}'.format(client_ip)]
+    return jsonify({'ip': client_ip}), 200
+
+
 @app.route("/user_ip", methods=["GET"])
 def get_ip():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        # doesn't even have to be reachable
-        s.connect(('10.255.255.255', 1))
-        IP = s.getsockname()[0]
-    except:
-        IP = '127.0.0.1'
-    finally:
-        s.close()
-    return IP
+    client_ip = request.environ.get('REMOTE_ADDR')
+    return jsonify({'ip': client_ip}), 200
 
 
 def init_and_login():
@@ -155,6 +157,4 @@ if __name__ == '__main__':
     res = get_ip()
     init_and_login()
     app.run(host="0.0.0.0", port=serverPort)
-    # limit_upload_download_speed(download_speed='2049', upload_speed='513')
-    # print_general_packets_data()
     driver.quit()
