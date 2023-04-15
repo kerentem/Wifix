@@ -20,7 +20,7 @@ logger.addHandler(console_handler)
 current_date = datetime.datetime.now().strftime("%Y-%m-%d")
 
 # Create and configure a file log handler with date in filename
-log_filename = f"logs/wifix_db_{current_date}.log"
+log_filename = f"wifix_db_{current_date}.log"
 file_handler = logging.FileHandler(log_filename)  # Log to file
 file_handler.setLevel(logging.DEBUG)  # Set handler logging level
 file_formatter = logging.Formatter(
