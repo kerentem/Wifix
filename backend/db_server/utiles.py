@@ -36,7 +36,11 @@ class ADMIN_ENDPOINTS:
     GET_CURRENT_BALANCE = f"{ADMIN}/get_current_balance"
     START_WIFI_SESSION = f"{ADMIN}/wifi_session/start"
     IS_EXPIRED_WIFI_SESSION = f"{ADMIN}/wifi_session/is_expired"
-    SET_NEW_TOKEN = f"{ADMIN}/set_new_token"
+
+
+class MANAGER_ENDPOINTS:
+    MANAGER = "/manager"
+    SET_NEW_TOKEN = f"{MANAGER}/set_new_token"
 
 
 def make_db_server_response(

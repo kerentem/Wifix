@@ -1,96 +1,18 @@
 import uuid
-from datetime import datetime
+from typing import List, Dict
+
 from flask_bcrypt import generate_password_hash
-
 from utiles import make_db_server_response, HttpStatus, Const
-from validation import validate_register_request, validate_datetime
+import threading
+import requests
+from validation import validate_ip
+
+ROUTER_SERVER_URL = "http://127.0.0.1:9285"
 
 
-class Admin:
+class Manager:
     def __init__(self, db_handler):
         self.db_handler = db_handler
-
-    def register(self, data):
-        full_name: str = data["full_name"]
-        password: str = data["password"]
-        email: str = data["email"]
-
-        validate_register_request(full_name=full_name, password=password, email=email)
-
-        hashed_password: str = generate_password_hash(password)
-
-        try:
-            self.db_handler.register(
-                full_name=full_name, email=email, hashed_password=hashed_password
-            )
-
-            msg = "Admin registered successfully"
-            response = make_db_server_response(HttpStatus.OK, msg, {})
-            return response
-
-        except Exception as e:
-            error_msg = str(e)
-            error_response = make_db_server_response(HttpStatus.OK, "", {}, error_msg)
-            return error_response
-
-    def login(self, data):
-        email: str = data["email"]
-        password: str = data["password"]
-
-        try:
-            is_user_registered_response: bool = self.db_handler.is_user_registered(
-                email=email, password=password
-            )
-
-            if is_user_registered_response:
-                response = make_db_server_response(
-                    HttpStatus.OK, "Admin registered", {"is_email_registered": True}
-                )
-            else:
-                response = make_db_server_response(
-                    HttpStatus.OK,
-                    "Admin not registered",
-                    {"is_email_registered": False},
-                )
-
-            return response
-
-        except Exception as e:
-            error_msg = str(e)
-            error_response = make_db_server_response(HttpStatus.OK, "", {}, error_msg)
-            return error_response
-
-    def get_current_balance(self, data):
-        from_date: str = data["from_date"]
-        to_date: str = data["to_date"]
-
-        validate_datetime(from_date)
-        validate_datetime(to_date)
-
-        from_date_timestamp = datetime.strptime(
-            from_date, Const.DATE_FORMAT
-        ).timestamp()
-        to_date_timestamp = datetime.strptime(to_date, Const.DATE_FORMAT).timestamp()
-
-        try:
-            current_balance = self.db_handler.get_current_balance(
-                from_date_timestamp, to_date_timestamp
-            )
-
-            data = {
-                "current_balance: ": current_balance,
-                "from_timestamp: ": from_date_timestamp,
-                "to_timestamp: ": to_date_timestamp,
-            }
-
-            response = make_db_server_response(HttpStatus.OK, "", data)
-
-            return response
-
-        except Exception as e:
-            error_msg = str(e)
-            error_response = make_db_server_response(HttpStatus.OK, "", {}, error_msg)
-            return error_response
 
     def is_valid_token(self, data) -> bool:
         company_name: str = data["company_name"]
@@ -112,6 +34,10 @@ class Admin:
         username: str = data["username"]
         password: str = data["password"]
         company_name: str = data["company_name"]
+        premium_upload_speed: int = data["premium_upload_speed"]
+        premium_download_speed: int = data["premium_download_speed"]
+        regular_upload_speed: int = data["regular_upload_speed"]
+        regular_download_speed: int = data["regular_download_speed"]
 
         def is_manager(username: str, password: str):
             return False if username != "wifix" or password != "12345" else True
@@ -124,7 +50,12 @@ class Admin:
 
         try:
             self.db_handler.set_company_token(
-                company_name=company_name, hashed_token=hashed_token
+                company_name=company_name,
+                hashed_token=hashed_token,
+                premium_upload_speed=premium_upload_speed,
+                premium_download_speed=premium_download_speed,
+                regular_upload_speed=regular_upload_speed,
+                regular_download_speed=regular_download_speed,
             )
 
             response = make_db_server_response(HttpStatus.OK, "", {"token": token})
@@ -134,3 +65,71 @@ class Admin:
             error_msg = str(e)
             error_response = make_db_server_response(HttpStatus.OK, "", {}, error_msg)
             return error_response
+
+    def update_wifi_speed(self, company: str):
+        clients_ips: Dict[str, Dict[str, int]] = self._get_users_ip(company)
+        company_speeds = self._get_company_speeds(company)
+
+        for ip in clients_ips.keys():
+            validate_ip(ip)
+
+        users_ips: List[str] = self.db_handler.get_premium_users(company)
+
+        for client_ip in clients_ips.keys():
+            if client_ip in users_ips:
+                client_speeds = clients_ips.get("client_ip")
+                if client_speeds:
+                    if (
+                        client_speeds["upload_speed"]
+                        != company_speeds.premium_upload_speed
+                        or clients_ips["client_ip"]["download_speed"]
+                        != company_speeds.premium_download_speed
+                    ):
+                        self.change_user_speed(
+                            ip=client_ip,
+                            upload_speed=company_speeds.premium_upload_speed,
+                            download_speed=company_speeds.premium_download_speed,
+                        )
+            else:
+                self.change_user_speed(
+                    ip=client_ip,
+                    upload_speed=company_speeds.regular_upload_speed,
+                    download_speed=company_speeds.regular_download_speed,
+                )
+
+    @staticmethod
+    def change_user_speed(ip, upload_speed, download_speed):
+        def request_task(url, json):
+            # requests.post(url, json=json)
+            pass
+
+        def fire_and_forget(url, json):
+            threading.Thread(target=request_task, args=(url, json)).start()
+
+        url = ROUTER_SERVER_URL + "/change_speed"
+
+        request = {
+            "ip": ip,
+            "upload_speed": upload_speed,
+            "download_speed": download_speed,
+        }
+
+        fire_and_forget(url, json=request)
+
+    @staticmethod
+    def _get_users_ip(company: str) -> Dict[str, Dict[str, int]]:
+        # http request to router
+        clients_ips: Dict[str, Dict[str, int]] = {
+            "192.168.0.100": {"upload_speed": 5, "download_speed": 10},
+            "180.168.0.200": {"upload_speed": 5, "download_speed": 10},
+        }
+
+        return clients_ips
+
+    def _get_company_speeds(self, company: str):
+        response = self.db_handler.get_company_speeds(company)
+        return response
+
+    def get_companies(self) -> List[str]:
+        response = self.db_handler.get_companies()
+        return response

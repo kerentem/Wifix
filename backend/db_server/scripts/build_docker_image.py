@@ -1,4 +1,3 @@
-from backend.db_server.logger_client import logger
 import os
 import subprocess
 from backend.db_server.docker_client.docker_utils import (
@@ -29,7 +28,7 @@ def build_docker_image(
 
     image = IMAGE_NAME.format(new_version)
 
-    logger.info("Building docker image")
+    print("Building docker image")
 
     subprocess.run(
         [
