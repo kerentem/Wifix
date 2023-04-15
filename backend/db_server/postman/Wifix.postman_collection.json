@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"full_name\": \"bar_test_swagger\",\n    \"email\": \"bs52952@gmail.com\",\n    \"password\": \"Aa12345678\"\n}",
+							"raw": "{\n    \"full_name\": \"Bar Sela\",\n    \"email\": \"bs5295@gmail.com\",\n    \"password\": \"Aa12345678\",\n    \"ip\": \"192.168.0.100\",\n    \"company_name\": \"bar_test\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -44,7 +44,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"bs52952@gmail.com\",\n    \"password\": \"Aa12345678\"\n}",
+							"raw": "{\n    \"email\": \"bs5295@gmail.com\",\n    \"password\": \"Aa12345678\",\n    \"ip\": \"192.168.0.80\",\n    \"company_name\": \"bar_test\"\n\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -100,7 +100,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"bs52952@gmail.com\",\n    \"end_time_in_min\": 1,\n    \"price\": 100\n}",
+							"raw": "{\n    \"email\": \"bs5295@gmail.com\",\n    \"end_time_in_min\": 1,\n    \"price\": 100,\n    \"ip\": \"192.168.0.100\",\n    \"company_name\": \"bar_test\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -128,7 +128,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://{{HOST}}:{{PORT}}/wifi_session/is_expired?email=bs52952@gmail.com",
+							"raw": "http://{{HOST}}:{{PORT}}/wifi_session/is_expired?email=bs5295@gmail.com&company_name=bar_test",
 							"protocol": "http",
 							"host": [
 								"{{HOST}}"
@@ -141,7 +141,11 @@
 							"query": [
 								{
 									"key": "email",
-									"value": "bs52952@gmail.com"
+									"value": "bs5295@gmail.com"
+								},
+								{
+									"key": "company_name",
+									"value": "bar_test"
 								}
 							]
 						}
@@ -154,7 +158,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://{{HOST}}:{{PORT}}/wifi_session/time_left?email=bs52952@gmail.com",
+							"raw": "http://{{HOST}}:{{PORT}}/wifi_session/time_left?email=bs5295@gmail.com&company_name=bar_test",
 							"protocol": "http",
 							"host": [
 								"{{HOST}}"
@@ -167,7 +171,11 @@
 							"query": [
 								{
 									"key": "email",
-									"value": "bs52952@gmail.com"
+									"value": "bs5295@gmail.com"
+								},
+								{
+									"key": "company_name",
+									"value": "bar_test"
 								}
 							]
 						}
@@ -186,7 +194,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"company_name\": \"wifix_test\",\n    \"token\": \"32ffd26c-dba9-460f-bea0-c8cbb0a4b92e\",\n    \"full_name\": \"bar_test\",\n    \"password\": \"Aa12345678\",\n    \"email\": \"bs52951@gmail.com\"\n}",
+							"raw": "{\n    \"company_name\": \"bar_test\",\n    \"token\": \"5e18068a-5b51-4403-a278-c171fe625924\",\n    \"full_name\": \"bar_test\",\n    \"password\": \"Aa12345678\",\n    \"email\": \"bs52951@gmail.com\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -215,7 +223,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"company_name\": \"wifix_test\",\n  \"token\": \"32ffd26c-dba9-460f-bea0-c8cbb0a4b92e\",\n  \"email\": \"bs52951@gmail.com\",\n  \"password\": \"Aa12345678\"\n}",
+							"raw": "{\n    \"company_name\": \"bar_test\",\n    \"token\": \"5e18068a-5b51-4403-a278-c171fe625924\",\n    \"password\": \"Aa12345678\",\n    \"email\": \"bs52951@gmail.com\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -244,7 +252,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"company_name\": \"wifix_test\",\n  \"token\": \"32ffd26c-dba9-460f-bea0-c8cbb0a4b92e\",\n  \"email\": \"bs52951@gmail.com\",\n  \"from_date\": \"2023-04-15\",\n  \"to_date\": \"2023-04-15\"\n}",
+							"raw": "{\n    \"company_name\": \"bar_test\",\n    \"token\": \"5e18068a-5b51-4403-a278-c171fe625924\",\n    \"email\": \"bs52951@gmail.com\",\n    \"from_date\": \"01/01/2023\",\n    \"to_date\": \"28/12/2023\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -328,6 +336,40 @@
 							"port": "9285",
 							"path": [
 								"user_ip"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Manager",
+			"item": [
+				{
+					"name": "/manager/set_new_token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"wifix\",\n    \"password\": \"12345\",\n    \"company_name\": \"bar_test\",\n    \"premium_upload_speed\": 10,\n    \"premium_download_speed\": 10,\n    \"regular_upload_speed\": 10,\n    \"regular_download_speed\": 10\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{HOST}}:{{PORT}}/manager/set_new_token",
+							"protocol": "http",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"manager",
+								"set_new_token"
 							]
 						}
 					},

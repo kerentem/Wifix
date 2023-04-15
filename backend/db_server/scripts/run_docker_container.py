@@ -5,7 +5,6 @@ from backend.db_server.docker_client.docker_utils import (
     get_docker_image_version,
     get_start_container_cmd,
 )
-from backend.db_server.logger_client import logger
 
 DOCKER_IMAGE_VERSION_PATH = "../docker_image_version/docker_image_version.py"
 RDS_ENDPOINT = os.environ["RDS_ENDPOINT"]
@@ -25,4 +24,4 @@ result = subprocess.run(start_container_cmd, shell=True, capture_output=True)
 # Print the output
 print(result.stderr.decode())
 
-logger.info(f"Running docker container: {current_version}")
+print(f"Running docker container: {current_version}")
