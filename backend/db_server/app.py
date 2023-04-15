@@ -5,7 +5,7 @@ from logger_client import logger
 from sqlalchemy_handler.db_client import DBHandler
 from endpoints.manager_endpoints.endpoints import Admin
 from endpoints.user_endpoints.endpoints import User
-from utiles import ADMIN_ENDPOINTS, USER_ENDPOINTS
+from utiles import ADMIN_ENDPOINTS, USER_ENDPOINTS, HttpStatus, make_db_server_response
 from mysql_util.mysql_exception import InvalidUsernameException
 from flask_cors import CORS
 
@@ -54,6 +54,14 @@ def is_valid_request():
                     raise InvalidUsernameException("User not registered")
 
 
+@db_server.errorhandler(Exception)
+def handle_exception(error):
+    response = make_db_server_response(
+        status_code=HttpStatus.OK, message="", data={}, error=str(error)
+    )
+    return response
+
+
 @db_server.route(USER_ENDPOINTS.REGISTER, methods=["POST"])
 def user_register():
     data = request.get_json()
@@ -82,10 +90,17 @@ def start_wifi_session():
     return response
 
 
-@db_server.route(USER_ENDPOINTS.IS_EXPIRED_WIFI_SESSION, methods=["Get"])
-def is_wifi_session_expired_endpoint(self, data):
-    data = request.get_json()
-    response = admin.register(data)
+@db_server.route(USER_ENDPOINTS.IS_EXPIRED_WIFI_SESSION, methods=["GET"])
+def is_wifi_session_expired_endpoint():
+    data = request.args
+    response = user.is_wifi_session_expired_endpoint(data)
+    return response
+
+
+@db_server.route(USER_ENDPOINTS.GET_END_SESSION_TIME, methods=["GET"])
+def get_end_session_time():
+    data = request.args
+    response = user.get_end_session_time(data)
     return response
 
 
@@ -114,16 +129,6 @@ def admin_get_current_balance():
 def set_new_token():
     data = request.get_json()
     response = admin.set_new_token(data)
-    return response
-
-
-db_handler = DBHandler(RDS_USERNAME, RDS_PASSWORD, RDS_ENDPOINT, DATABASE, RDS_PORT)
-
-
-@db_server.route(USER_ENDPOINTS.GET_END_SESSION_TIME, methods=["GET"])
-def get_end_session_time():
-    data = request.args
-    response = user.get_end_session_time(data)
     return response
 
 

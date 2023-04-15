@@ -48,7 +48,9 @@ class Admin:
                 )
             else:
                 response = make_db_server_response(
-                    HttpStatus.OK, "Admin not registered", {"is_email_registered": False}
+                    HttpStatus.OK,
+                    "Admin not registered",
+                    {"is_email_registered": False},
                 )
 
             return response
