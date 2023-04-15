@@ -44,10 +44,10 @@ class MANAGER_ENDPOINTS:
 
 
 def make_db_server_response(
-        status_code: HttpStatus,
-        message: str,
-        data: Dict[Any, Any],
-        error: Optional[str] = None,
+    status_code: HttpStatus,
+    message: str,
+    data: Dict[Any, Any],
+    error: Optional[str] = None,
 ):
     response = {
         "message": message,

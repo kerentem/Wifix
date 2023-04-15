@@ -5,6 +5,7 @@ from flask_bcrypt import generate_password_hash
 from utiles import make_db_server_response, HttpStatus, Const
 from validation import validate_register_request, validate_datetime, validate_ip
 
+
 class Admin:
     def __init__(self, db_handler):
         self.db_handler = db_handler
@@ -20,7 +21,10 @@ class Admin:
 
         try:
             self.db_handler.register(
-                full_name=full_name, email=email, hashed_password=hashed_password, is_admin=True
+                full_name=full_name,
+                email=email,
+                hashed_password=hashed_password,
+                is_admin=True,
             )
 
             msg = "Admin registered successfully"

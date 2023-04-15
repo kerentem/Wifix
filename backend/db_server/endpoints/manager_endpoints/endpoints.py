@@ -11,7 +11,6 @@ ROUTER_SERVER_URL = "http://127.0.0.1:9285"
 
 
 class Manager:
-
     def __init__(self, db_handler):
         self.db_handler = db_handler
 
@@ -80,18 +79,28 @@ class Manager:
             if client_ip in users_ips:
                 client_speeds = clients_ips.get("client_ip")
                 if client_speeds:
-                    if client_speeds["upload_speed"] != company_speeds.premium_upload_speed or \
-                            clients_ips["client_ip"]["download_speed"] != company_speeds.premium_download_speed:
-                        self.change_user_speed(ip=client_ip, upload_speed=company_speeds.premium_upload_speed,
-                                               download_speed=company_speeds.premium_download_speed)
+                    if (
+                        client_speeds["upload_speed"]
+                        != company_speeds.premium_upload_speed
+                        or clients_ips["client_ip"]["download_speed"]
+                        != company_speeds.premium_download_speed
+                    ):
+                        self.change_user_speed(
+                            ip=client_ip,
+                            upload_speed=company_speeds.premium_upload_speed,
+                            download_speed=company_speeds.premium_download_speed,
+                        )
             else:
-                self.change_user_speed(ip=client_ip, upload_speed=company_speeds.regular_upload_speed,
-                                       download_speed=company_speeds.regular_download_speed)
+                self.change_user_speed(
+                    ip=client_ip,
+                    upload_speed=company_speeds.regular_upload_speed,
+                    download_speed=company_speeds.regular_download_speed,
+                )
 
     @staticmethod
     def change_user_speed(ip, upload_speed, download_speed):
         def request_task(url, json):
-            #requests.post(url, json=json)
+            # requests.post(url, json=json)
             pass
 
         def fire_and_forget(url, json):
@@ -103,7 +112,6 @@ class Manager:
             "ip": ip,
             "upload_speed": upload_speed,
             "download_speed": download_speed,
-
         }
 
         fire_and_forget(url, json=request)
@@ -112,14 +120,8 @@ class Manager:
     def _get_users_ip(company: str) -> Dict[str, Dict[str, int]]:
         # http request to router
         clients_ips: Dict[str, Dict[str, int]] = {
-            "192.168.0.100": {
-                "upload_speed": 5,
-                "download_speed": 10
-            },
-            "180.168.0.200": {
-                "upload_speed": 5,
-                "download_speed": 10
-            }
+            "192.168.0.100": {"upload_speed": 5, "download_speed": 10},
+            "180.168.0.200": {"upload_speed": 5, "download_speed": 10},
         }
 
         return clients_ips

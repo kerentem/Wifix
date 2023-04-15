@@ -46,9 +46,7 @@ class Payment(Base):
     __tablename__ = "payments"
     id = Column(Integer, primary_key=True)
 
-    email = Column(
-        String(255), ForeignKey("users.email"), nullable=False
-    )
+    email = Column(String(255), ForeignKey("users.email"), nullable=False)
     price = Column(Integer, nullable=False)
     created_at = Column(BigInteger, nullable=False)
 
@@ -66,7 +64,9 @@ class Company(Base):
 class UserCompany(Base):
     __tablename__ = "user_companies"
     id = Column(Integer, primary_key=True)
-    company_name = Column(String(255), ForeignKey("companies.company_name"), nullable=False)
+    company_name = Column(
+        String(255), ForeignKey("companies.company_name"), nullable=False
+    )
     email = Column(String(255), ForeignKey("users.email"), nullable=False)
 
 
@@ -91,7 +91,7 @@ class WifiSessionHistory(Base):
     company_name = Column(String(255), nullable=False)
 
 
-@listens_for(WifiSession, 'after_insert')
+@listens_for(WifiSession, "after_insert")
 def after_wifi_session_insert(mapper, connection, target):
     Session = sessionmaker(bind=connection)
     session = Session()
@@ -99,7 +99,7 @@ def after_wifi_session_insert(mapper, connection, target):
         email=target.email,
         start_time=target.start_time,
         end_time=target.end_time,
-        company_name=target.company_name
+        company_name=target.company_name,
     )
     session.add(wifi_session_history)
     session.commit()

@@ -35,7 +35,7 @@ class User:
                 email=email,
                 hashed_password=hashed_password,
                 ip=ip,
-                company_name=company_name
+                company_name=company_name,
             )
 
             if EMAIL:
@@ -146,11 +146,15 @@ class User:
         # Inserting the data to the wifi_session table and payment table
         try:
             self.db_handler.set_user_ip(email, ip)
-            self.db_handler.start_wifi_session(email, start_time, end_time, data_usage, company_name)
+            self.db_handler.start_wifi_session(
+                email, start_time, end_time, data_usage, company_name
+            )
             try:
                 self.db_handler.insert_payment(email, price)
             except Exception as e:
-                self.db_handler.remove_wifi_session(email, start_time, end_time, company_name)
+                self.db_handler.remove_wifi_session(
+                    email, start_time, end_time, company_name
+                )
 
                 error_response = make_db_server_response(HttpStatus.OK, "", {}, str(e))
                 return error_response
@@ -192,7 +196,9 @@ class User:
         company_name: str = data["company_name"]
 
         try:
-            wifi_session: WifiSession = self.db_handler.get_wifi_session_expired(email, company_name)
+            wifi_session: WifiSession = self.db_handler.get_wifi_session_expired(
+                email, company_name
+            )
 
             if wifi_session:
                 response = {"end_session_time_timestamp": wifi_session.end_time}

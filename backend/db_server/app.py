@@ -9,7 +9,13 @@ from sqlalchemy_handler.db_client import DBHandler
 from endpoints.admin_endpoints.endpoints import Admin
 from endpoints.user_endpoints.endpoints import User
 from endpoints.manager_endpoints.endpoints import Manager
-from utiles import ADMIN_ENDPOINTS, USER_ENDPOINTS, MANAGER_ENDPOINTS, HttpStatus, make_db_server_response
+from utiles import (
+    ADMIN_ENDPOINTS,
+    USER_ENDPOINTS,
+    MANAGER_ENDPOINTS,
+    HttpStatus,
+    make_db_server_response,
+)
 from flask_cors import CORS
 
 db_server = Flask(__name__)
@@ -153,7 +159,6 @@ def main():
     db_handler.create_events()
     init_update_speed_thread(manager)
     db_server.run(debug=False, port=8080, host="0.0.0.0")
-
 
 
 if __name__ == "__main__":

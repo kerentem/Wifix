@@ -16,19 +16,19 @@ from sqlalchemy_handler.db_models import (
     CreditCard,
     Payment,
     Company,
-    UserCompany
+    UserCompany,
 )
 import datetime
 
 
 class DBHandler:
     def __init__(
-            self,
-            rds_username: str,
-            rds_password: str,
-            rds_endpoint: str,
-            database: str,
-            rds_port: int,
+        self,
+        rds_username: str,
+        rds_password: str,
+        rds_endpoint: str,
+        database: str,
+        rds_port: int,
     ):
 
         url = f"mysql+pymysql://{rds_username}:{rds_password}@{rds_endpoint}:{rds_port}/{database}"
@@ -80,7 +80,13 @@ class DBHandler:
         return user is not None
 
     def register(
-            self, full_name: str, email: str, hashed_password: str, ip: Optional[str] = None, company_name: Optional[str] = None, is_admin: bool = False
+        self,
+        full_name: str,
+        email: str,
+        hashed_password: str,
+        ip: Optional[str] = None,
+        company_name: Optional[str] = None,
+        is_admin: bool = False,
     ):
         session = self.get_session()
 
@@ -111,7 +117,11 @@ class DBHandler:
                 raise error
 
     def is_user_registered(
-            self, email: str, password: str, company_name: Optional[str] = None, is_admin: bool = False
+        self,
+        email: str,
+        password: str,
+        company_name: Optional[str] = None,
+        is_admin: bool = False,
     ) -> bool:
         session = self.get_session()
         is_valid_company = True
@@ -120,7 +130,9 @@ class DBHandler:
             user = session.query(Admin).filter_by(email=email).first()
         else:
             user = session.query(User).filter_by(email=email).first()
-            is_valid_company = session.query(UserCompany).filter_by(company_name=company_name).first()
+            is_valid_company = (
+                session.query(UserCompany).filter_by(company_name=company_name).first()
+            )
 
         if not user or not is_valid_company:
             return False
@@ -132,12 +144,14 @@ class DBHandler:
         user = session.query(User).filter_by(email=email).first()
 
         if user and user.ip != user_ip:
-            logger.info(f"Updating ip for user: {email}, old_ip: {user.ip}, new_ip: {user_ip}")
+            logger.info(
+                f"Updating ip for user: {email}, old_ip: {user.ip}, new_ip: {user_ip}"
+            )
             user.ip = user_ip
             session.commit()
 
     def add_credit_card(
-            self, card_number, expiration_month, expiration_year, hashed_cvv, email
+        self, card_number, expiration_month, expiration_year, hashed_cvv, email
     ):
         session = self.get_session()
         user = session.query(User).filter_by(email=email).first()
@@ -162,9 +176,15 @@ class DBHandler:
             else:
                 raise error
 
-    def get_wifi_session_expired(self, email: str, company_name: str) -> Optional[Row[_TP]]:
+    def get_wifi_session_expired(
+        self, email: str, company_name: str
+    ) -> Optional[Row[_TP]]:
         session = self.get_session()
-        result = session.query(WifiSession).filter_by(email=email, company_name=company_name).first()
+        result = (
+            session.query(WifiSession)
+            .filter_by(email=email, company_name=company_name)
+            .first()
+        )
         return result
 
     def is_wifi_session_expired(self, email: str, company_name: str) -> bool:
@@ -172,7 +192,12 @@ class DBHandler:
         return is_expired
 
     def start_wifi_session(
-            self, email: str, start_time: float, end_time: float, data_usage: int, company_name: str
+        self,
+        email: str,
+        start_time: float,
+        end_time: float,
+        data_usage: int,
+        company_name: str,
     ):
         session = self.get_session()
 
@@ -182,7 +207,7 @@ class DBHandler:
                 start_time=start_time,
                 end_time=end_time,
                 data_usage=data_usage,
-                company_name=company_name
+                company_name=company_name,
             )
             session.add(wifi_session)
             session.commit()
@@ -201,11 +226,16 @@ class DBHandler:
             else:
                 raise error
 
-    def remove_wifi_session(self, email: str, start_time: int, end_time: int, company_name: str):
+    def remove_wifi_session(
+        self, email: str, start_time: int, end_time: int, company_name: str
+    ):
         session = self.get_session()
         try:
             session.query(WifiSession).filter_by(
-                email=email, start_time=start_time, end_time=end_time, company_name=company_name
+                email=email,
+                start_time=start_time,
+                end_time=end_time,
+                company_name=company_name,
             ).delete()
             session.commit()
 
@@ -238,7 +268,7 @@ class DBHandler:
             session.close()
 
     def get_current_balance(
-            self, from_date_timestamp: float, to_date_timestamp: float
+        self, from_date_timestamp: float, to_date_timestamp: float
     ) -> int:
         session = self.Session()
         try:
@@ -280,13 +310,15 @@ class DBHandler:
         else:
             return False
 
-    def set_company_token(self, company_name: str,
-                          hashed_token: str,
-                          premium_upload_speed: int,
-                          premium_download_speed: int,
-                          regular_upload_speed: int,
-                          regular_download_speed: int,
-                          ):
+    def set_company_token(
+        self,
+        company_name: str,
+        hashed_token: str,
+        premium_upload_speed: int,
+        premium_download_speed: int,
+        regular_upload_speed: int,
+        regular_download_speed: int,
+    ):
         session = self.get_session()
         try:
             company_token = Company(
@@ -321,8 +353,16 @@ class DBHandler:
 
     def get_premium_users(self, company: str) -> List[str]:
         session = self.get_session()
-        users_ips = session.query(User.ip).join(WifiSession, (User.email == WifiSession.email) & (
-                WifiSession.company_name == company)).distinct().all()
+        users_ips = (
+            session.query(User.ip)
+            .join(
+                WifiSession,
+                (User.email == WifiSession.email)
+                & (WifiSession.company_name == company),
+            )
+            .distinct()
+            .all()
+        )
 
         # Extract the IPs from the result
         users_ips = [user_ip[0] for user_ip in users_ips]
