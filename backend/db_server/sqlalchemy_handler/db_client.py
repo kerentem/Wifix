@@ -99,8 +99,8 @@ class DBHandler:
         except Exception as error:
             session.rollback()
 
-            if vars(error).get('orig'):
-                raise Exception(vars(error).get('orig'))
+            if vars(error).get("orig"):
+                raise Exception(vars(error).get("orig"))
             else:
                 raise error
 
@@ -139,8 +139,8 @@ class DBHandler:
         except Exception as error:
             session.rollback()
 
-            if vars(error).get('orig'):
-                raise Exception(vars(error).get('orig'))
+            if vars(error).get("orig"):
+                raise Exception(vars(error).get("orig"))
             else:
                 raise error
 
@@ -177,8 +177,8 @@ class DBHandler:
             session.rollback()
             logger.error(f"Error starting WiFi session. Error: {error}")
 
-            if vars(error).get('orig'):
-                raise Exception(vars(error).get('orig'))
+            if vars(error).get("orig"):
+                raise Exception(vars(error).get("orig"))
             else:
                 raise error
 
@@ -199,8 +199,8 @@ class DBHandler:
             session.rollback()
             logger.error(f"Error removing WiFi session. Error: {error}")
 
-            if vars(error).get('orig'):
-                raise Exception(vars(error).get('orig'))
+            if vars(error).get("orig"):
+                raise Exception(vars(error).get("orig"))
             else:
                 raise error
 
@@ -237,8 +237,8 @@ class DBHandler:
                 f"Error while getting admin balance with MySQL,\n" f"Error: {error}"
             )
 
-            if vars(error).get('orig'):
-                raise Exception(vars(error).get('orig'))
+            if vars(error).get("orig"):
+                raise Exception(vars(error).get("orig"))
             else:
                 raise error
 
@@ -260,8 +260,8 @@ class DBHandler:
             return False
 
         except Exception as error:
-            if vars(error).get('orig'):
-                raise Exception(vars(error).get('orig'))
+            if vars(error).get("orig"):
+                raise Exception(vars(error).get("orig"))
             else:
                 raise error
 
@@ -283,7 +283,7 @@ class DBHandler:
 
         except Exception as error:
             session.rollback()
-            if vars(error).get('orig'):
-                raise Exception(vars(error).get('orig'))
+            if vars(error).get("orig"):
+                raise Exception(vars(error).get("orig"))
             else:
                 raise error

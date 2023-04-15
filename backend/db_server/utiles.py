@@ -40,11 +40,16 @@ class ADMIN_ENDPOINTS:
 
 
 def make_db_server_response(
-    status_code: HttpStatus, message: str, data: Dict[Any, Any], error: Optional[str]=None
+    status_code: HttpStatus,
+    message: str,
+    data: Dict[Any, Any],
+    error: Optional[str] = None,
 ):
-    response = {"message": message,
-                "data": data,
-                "error": True if error else False,
-                "error_message": error}
+    response = {
+        "message": message,
+        "data": data,
+        "error": True if error else False,
+        "error_message": error,
+    }
 
     return jsonify(response), status_code.value

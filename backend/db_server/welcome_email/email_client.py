@@ -28,9 +28,13 @@ class EmailClient:
                 if creds and creds.expired and creds.refresh_token:
                     creds.refresh(Request())
                 else:
-                    credentials_path = "/wifix/backend/db_server/welcome_email/credentials.json"
+                    credentials_path = (
+                        "/wifix/backend/db_server/welcome_email/credentials.json"
+                    )
                     if not os.path.exists(credentials_path):
-                        credentials_path = "backend/db_server/welcome_email/credentials.json"
+                        credentials_path = (
+                            "backend/db_server/welcome_email/credentials.json"
+                        )
 
                     flow = InstalledAppFlow.from_client_secrets_file(
                         credentials_path,
@@ -49,9 +53,7 @@ class EmailClient:
         if not os.path.exists(file_path):
             file_path = "welcome_email/welcome_email_template.html"
 
-        with open(
-                file_path, "r"
-        ) as file:
+        with open(file_path, "r") as file:
             self.html_body = file.read()
 
     def send_email(self, to: str):

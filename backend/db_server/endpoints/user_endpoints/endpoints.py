@@ -178,7 +178,11 @@ class User:
 
             if wifi_session:
                 response = {"end_session_time_timestamp": wifi_session.end_time}
-                return make_db_server_response(HttpStatus.OK, "", response,)
+                return make_db_server_response(
+                    HttpStatus.OK,
+                    "",
+                    response,
+                )
             else:
                 error_msg: str = "There isn't wifi session for the user"
                 return make_db_server_response(HttpStatus.OK, "", {}, error_msg)
