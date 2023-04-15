@@ -2,7 +2,7 @@ from typing import Optional
 import datetime
 from flask_bcrypt import generate_password_hash
 from utiles import make_db_server_response, HttpStatus
-from validation import validate_register_request, validate_credit_card
+from validation import validate_register_request, validate_credit_card, validate_ip
 
 from welcome_email.email_client import EmailClient
 
@@ -22,14 +22,20 @@ class User:
         full_name: str = data["full_name"]
         password: str = data["password"]
         email: str = data["email"]
+        ip: str = data["ip"]
+        company_name: str = data["company_name"]
 
-        validate_register_request(full_name, password, email)
+        validate_register_request(password, email, ip)
 
         hashed_password: str = generate_password_hash(password)
 
         try:
             self.db_handler.register(
-                full_name=full_name, email=email, hashed_password=hashed_password
+                full_name=full_name,
+                email=email,
+                hashed_password=hashed_password,
+                ip=ip,
+                company_name=company_name
             )
 
             if EMAIL:
@@ -48,11 +54,17 @@ class User:
     def login(self, data):
         email: str = data["email"]
         password: str = data["password"]
+        ip: str = data["ip"]
+        company_name: str = data["company_name"]
+
+        validate_ip(ip)
 
         try:
             is_user_registered_response: bool = self.db_handler.is_user_registered(
-                email=email, password=password
+                email=email, password=password, company_name=company_name
             )
+
+            self.db_handler.set_user_ip(email=email, user_ip=ip)
 
             if is_user_registered_response:
                 response = make_db_server_response(
@@ -104,12 +116,15 @@ class User:
     def start_wifi_session(self, data):
         email: str = data["email"]
         price: int = data["price"]
+        ip: str = data["ip"]
+        company_name: str = data["company_name"]
+
         end_time_in_min: int = data["end_time_in_min"]
         data_usage: Optional[int] = (
             data.get("data_usage") if data.get("data_usage") else 0
         )
 
-        if not self.db_handler.is_wifi_session_expired(email):
+        if not self.db_handler.is_wifi_session_expired(email, company_name):
             error_msg = "There is a wifi session for the user"
             error_response = make_db_server_response(HttpStatus.OK, "", {}, error_msg)
             return error_response
@@ -130,11 +145,12 @@ class User:
 
         # Inserting the data to the wifi_session table and payment table
         try:
-            self.db_handler.start_wifi_session(email, start_time, end_time, data_usage)
+            self.db_handler.set_user_ip(email, ip)
+            self.db_handler.start_wifi_session(email, start_time, end_time, data_usage, company_name)
             try:
                 self.db_handler.insert_payment(email, price)
             except Exception as e:
-                self.db_handler.remove_wifi_session(email, start_time, end_time)
+                self.db_handler.remove_wifi_session(email, start_time, end_time, company_name)
 
                 error_response = make_db_server_response(HttpStatus.OK, "", {}, str(e))
                 return error_response
@@ -150,14 +166,15 @@ class User:
 
     def is_wifi_session_expired_endpoint(self, data):
         email: str = data["email"]
+        company_name: str = data["company_name"]
 
         try:
-            is_expired = self.db_handler.is_wifi_session_expired(email)
+            is_expired = self.db_handler.is_wifi_session_expired(email, company_name)
 
             if is_expired:
-                msg = f"Wifi session is expired for email: {email}"
+                msg = f"Wifi session is expired for email: {email}, company_name: {company_name}"
             else:
-                msg = f"Wifi session is not expired for email: {email}"
+                msg = f"Wifi session is not expired for email: {email}, company_name: {company_name}"
 
             data = {"is_expired": is_expired}
 
@@ -172,9 +189,10 @@ class User:
 
     def get_end_session_time(self, data) -> float:
         email: str = data["email"]
+        company_name: str = data["company_name"]
 
         try:
-            wifi_session: WifiSession = self.db_handler.get_wifi_session_expired(email)
+            wifi_session: WifiSession = self.db_handler.get_wifi_session_expired(email, company_name)
 
             if wifi_session:
                 response = {"end_session_time_timestamp": wifi_session.end_time}

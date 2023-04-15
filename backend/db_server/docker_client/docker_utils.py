@@ -1,8 +1,6 @@
 import re
 import subprocess
 
-from backend.db_server.logger_client import logger
-
 CONTAINER_NAME = "wifix_db_server_container_{}"
 IMAGE_NAME = "barsela/wifix_db_server:{}"
 
@@ -19,13 +17,13 @@ def get_docker_image_version(docker_image_version_path: str) -> str:
 
 def push_docker_image(docker_username: str, docker_password: str, image: str):
     # Login to Docker Hub
-    logger.info("Logining to docker hub")
+    print("Logining to docker hub")
     subprocess.run(["docker", "login", "-u", docker_username, "-p", docker_password])
 
     # Push the Docker image to Docker Hub
-    logger.info("Pushing to docker hub")
+    print("Pushing to docker hub")
     subprocess.run(["docker", "push", image])
-    logger.info(f"Pushed image: {image}")
+    print(f"Pushed image: {image}")
 
 
 def get_start_container_cmd(
