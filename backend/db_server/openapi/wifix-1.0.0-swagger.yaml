@@ -4,10 +4,14 @@ info:
   title: WiFix API
 
 servers:
-  # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/BARSELA/wifix/1.0.0
-  - url: http://18.200.177.9:8080
+
+  - description: Router Server
+    url: http://127.0.0.1:9285
+
+  - description: DB Server
+    url: http://18.200.177.9:8080
 
 tags:
   - name: Admin

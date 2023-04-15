@@ -7,110 +7,333 @@
 	},
 	"item": [
 		{
-			"name": "Register",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"username\": \"bar_sela\",\n    \"password\": \"Aa12345678\",\n    \"email\": \"bs5295@gmail.com\"\n\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+			"name": "User",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"full_name\": \"bar_test_swagger\",\n    \"email\": \"bs52952@gmail.com\",\n    \"password\": \"Aa12345678\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{HOST}}:{{PORT}}/register",
+							"protocol": "http",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"register"
+							]
 						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "http://{{HOST}}/register",
-					"protocol": "http",
-					"host": [
-						"{{HOST}}"
-					],
-					"path": [
-						"register"
-					]
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"bs52952@gmail.com\",\n    \"password\": \"Aa12345678\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{HOST}}:{{PORT}}/login",
+							"protocol": "http",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add_card",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"bs5295@gmail.com\",\n    \"card_number\": \"3566000020000410\",\n    \"exp_month\": \"02\",\n    \"exp_year\": \"2026\",\n    \"cvv\": \"123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{HOST}}:{{PORT}}/add_card",
+							"protocol": "http",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"add_card"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "start_wifi_session",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"bs52952@gmail.com\",\n    \"end_time_in_min\": 1,\n    \"price\": 100\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{HOST}}:{{PORT}}/wifi_session/start",
+							"protocol": "http",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"wifi_session",
+								"start"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_wifi_session - end_time",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{HOST}}:{{PORT}}/wifi_session/is_expired?email=bs52952@gmail.com",
+							"protocol": "http",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"wifi_session",
+								"is_expired"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "bs52952@gmail.com"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_wifi_session_time_left",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{HOST}}:{{PORT}}/wifi_session/time_left?email=bs52952@gmail.com",
+							"protocol": "http",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"wifi_session",
+								"time_left"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "bs52952@gmail.com"
+								}
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "add_card",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"username\": \"bar_sela\",\n    \"card_number\": \"3566000020000410\",\n    \"exp_month\": \"02\",\n    \"exp_year\": \"2026\",\n    \"cvv\": \"123\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+			"name": "Admin",
+			"item": [
+				{
+					"name": "/admin/register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"company_name\": \"wifix_test\",\n    \"token\": \"32ffd26c-dba9-460f-bea0-c8cbb0a4b92e\",\n    \"full_name\": \"bar_test\",\n    \"password\": \"Aa12345678\",\n    \"email\": \"bs52951@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{HOST}}:{{PORT}}/admin/register",
+							"protocol": "http",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"admin",
+								"register"
+							]
 						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "http://{{HOST}}/add_card",
-					"protocol": "http",
-					"host": [
-						"{{HOST}}"
-					],
-					"path": [
-						"add_card"
-					]
+				{
+					"name": "/admin/login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"company_name\": \"wifix_test\",\n  \"token\": \"32ffd26c-dba9-460f-bea0-c8cbb0a4b92e\",\n  \"email\": \"bs52951@gmail.com\",\n  \"password\": \"Aa12345678\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{HOST}}:{{PORT}}/admin/login",
+							"protocol": "http",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"admin",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/admin/get_current_balance",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"company_name\": \"wifix_test\",\n  \"token\": \"32ffd26c-dba9-460f-bea0-c8cbb0a4b92e\",\n  \"email\": \"bs52951@gmail.com\",\n  \"from_date\": \"2023-04-15\",\n  \"to_date\": \"2023-04-15\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{HOST}}:{{PORT}}/admin/get_current_balance",
+							"protocol": "http",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"admin",
+								"get_current_balance"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "start_wifi_session",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"username\": \"bar_sela\",\n    \"start_time\": {\"date\": \"2022-04-05\",\"time\": \"20:25:30\"},\n    \"end_time\": {\"date\": \"2023-03-11\",\"time\": \"16:11:00\"},\n    \"data_usage\": 2\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+			"name": "Router",
+			"item": [
+				{
+					"name": "change_speed",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"client_ip\": \"192.168.0.100\",\n  \"upload_speed\": 5,\n  \"download_speed\": 10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:9285/change_speed",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "9285",
+							"path": [
+								"change_speed"
+							]
 						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "http://{{HOST}}/start_wifi_session",
-					"protocol": "http",
-					"host": [
-						"{{HOST}}"
-					],
-					"path": [
-						"start_wifi_session"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "get_wifi_session - end_time",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://{{HOST}}/get_wifi_session/end_time?username=bar_sela",
-					"protocol": "http",
-					"host": [
-						"{{HOST}}"
-					],
-					"path": [
-						"get_wifi_session",
-						"end_time"
-					],
-					"query": [
-						{
-							"key": "username",
-							"value": "bar_sela"
+				{
+					"name": "change_speed Copy",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ip\": \"192.168.0.100\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:9285/user_ip",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "9285",
+							"path": [
+								"user_ip"
+							]
 						}
-					]
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		}
 	],
 	"event": [
@@ -136,7 +359,18 @@
 	"variable": [
 		{
 			"key": "HOST",
-			"value": "127.0.0.1:8080",
+			"value": "18.200.177.9",
+			"type": "string",
+			"disabled": true
+		},
+		{
+			"key": "PORT",
+			"value": "8080",
+			"type": "string"
+		},
+		{
+			"key": "HOST",
+			"value": "localhost",
 			"type": "string"
 		}
 	]
