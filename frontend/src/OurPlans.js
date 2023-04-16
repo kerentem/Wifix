@@ -1,5 +1,7 @@
 import React from "react";
 import "./style/OurPlans.css"
+import {useNavigate} from "react-router-dom";
+
 const plans = [
     {
         id: 1,
@@ -22,6 +24,15 @@ const plans = [
 ];
 
 const OurPlans = () => {
+    const navigate = useNavigate();
+
+    const handleClick = () => {
+        const confirmed = window.confirm('Are you sure you want to proceed?');
+        if (confirmed) {
+            navigate("/countdown")
+        }
+
+    };
     return (
         <div className="plans-container">
             <h1>Our Plans</h1>
@@ -35,7 +46,7 @@ const OurPlans = () => {
                                 <li key={index}>{feature}</li>
                             ))}
                         </ul>
-                        <button>Select Plan</button>
+                        <button onClick={handleClick}>Select Plan</button>
                     </div>
                 ))}
             </div>
