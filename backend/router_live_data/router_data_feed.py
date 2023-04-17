@@ -1,7 +1,6 @@
 import psutil
 import json
 from selenium import webdriver
-import requests
 from flask import Flask, request, jsonify
 from selenium.webdriver.common.by import By
 
@@ -15,6 +14,24 @@ hostName = "0.0.0.0"
 serverPort = 9285
 
 app = Flask(__name__)
+
+
+@app.route("/")
+def hello():
+    return "Hello Geeks!!"
+
+
+@app.route("/get_my_ip", methods=["GET"])
+def get_my_ip():
+    client_ip = request.environ.get("REMOTE_ADDR")
+    # return ['Your IP is: {}'.format(client_ip)]
+    return jsonify({"ip": client_ip}), 200
+
+
+@app.route("/user_ip", methods=["GET"])
+def get_ip():
+    client_ip = request.environ.get("REMOTE_ADDR")
+    return jsonify({"ip": client_ip}), 200
 
 
 def init_and_login():
@@ -35,29 +52,72 @@ def init_and_login():
     driver.implicitly_wait(10)
 
 
-def limit_upload_download_speed(upload_speed, download_speed):
+@app.route("/change_speed", methods=["POST"])
+def limit_upload_download_speed():
+    input_json_object = request.get_json(force=True)
+    client_ip = input_json_object["client_ip"]
+    upload_speed = input_json_object["upload_speed"]
+    download_speed = input_json_object["download_speed"]
     # Find the router's information
     driver.switch_to.frame("bottomLeftFrame")
-    driver.find_element(By.XPATH, '//*[@id="ol38"]').click()
+    driver.find_element(By.XPATH, '//*[@id="a38"]').click()
+    driver.find_element(By.XPATH, '//*[@id="ol40"]').click()
     driver.switch_to.default_content()
     driver.switch_to.frame("mainFrame")
-    egress_bandwidth_field = driver.find_element(By.XPATH,
-                                                 '/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[3]/td['
-                                                 '2]/input')
-    egress_bandwidth_field.clear()
-    egress_bandwidth_field.send_keys(upload_speed)
-    egress_bandwidth_field = driver.find_element(By.XPATH,
-                                                 '/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[4]/td['
-                                                 '2]/input')
-    egress_bandwidth_field.clear()
-    egress_bandwidth_field.send_keys(download_speed)
-    router_info = egress_bandwidth_field
-    print(router_info)
+    driver.find_element(
+        By.XPATH, '//*[@id="autoWidth"]/tbody/tr[5]/td/input[1]'
+    ).click()
+    ip_range = driver.find_element(
+        By.XPATH, '//*[@id="autoWidth"]/tbody/tr[3]/td/table/tbody/tr[2]/td[2]/input[1]'
+    )
+    ip_range.clear()
+    ip_range.send_keys(client_ip)
+    port_range_from = driver.find_element(
+        By.XPATH,
+        "/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[3]/td[2]/input[1]",
+    )
+    port_range_from.clear()
+    port_range_from.send_keys(1)
+    port_range_to = driver.find_element(
+        By.XPATH,
+        "/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[3]/td[2]/input[2]",
+    )
+    port_range_to.clear()
+    port_range_to.send_keys(8000)
+    egress_bandwidth_from = driver.find_element(
+        By.XPATH,
+        "/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[6]/td[" "2]/input",
+    )
+    egress_bandwidth_from.clear()
+    egress_bandwidth_from.send_keys(1)
+    egress_bandwidth_to = driver.find_element(
+        By.XPATH,
+        "/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[6]/td[" "3]/input",
+    )
+    egress_bandwidth_to.clear()
+    egress_bandwidth_to.send_keys(upload_speed)
+    ingress_bandwidth_from = driver.find_element(
+        By.XPATH,
+        "/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[7]/td[" "2]/input",
+    )
+    ingress_bandwidth_from.clear()
+    ingress_bandwidth_from.send_keys(1)
+    ingress_bandwidth_to = driver.find_element(
+        By.XPATH,
+        "/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[7]/td[" "3]/input",
+    )
+    ingress_bandwidth_to.clear()
+    ingress_bandwidth_to.send_keys(download_speed)
+    driver.find_element(
+        By.XPATH, '//*[@id="autoWidth"]/tbody/tr[5]/td/input[1]'
+    ).click()
+    result = {"result": "SUCCESS"}
+    return jsonify(result), 200
 
 
 def print_general_packets_data():
     # Get the network interface for internet usage
-    interface = psutil.net_io_counters(pernic=True)['WiFi']
+    interface = psutil.net_io_counters(pernic=True)["WiFi"]
 
     # Get the total number of bytes sent and received
     bytes_sent: int = interface.packets_sent
@@ -79,19 +139,29 @@ def get_wireless_customer_data():
     driver.find_element(By.XPATH, '//*[@id="a12"]').click()
     driver.switch_to.default_content()
     driver.switch_to.frame("mainFrame")
-    LIVE_USERS = driver.find_element(By.XPATH, '//*[@id="autoWidth"]/tbody/tr[3]/td[2]').text
+    LIVE_USERS = driver.find_element(
+        By.XPATH, '//*[@id="autoWidth"]/tbody/tr[3]/td[2]'
+    ).text
     amount_range = range(int(LIVE_USERS))
     result_usage_dict: dict = {}
     for connection in amount_range:
         connection_index: int = 2 + connection
-        connection_received_packets = driver.find_element(By.XPATH, '//*[@id="autoWidth"]/tbody/tr['
-                                                                    '5]/td/table/tbody/tr[{}]/td[4]'.
-                                                          format(connection_index)).text
+        connection_received_packets = driver.find_element(
+            By.XPATH,
+            '//*[@id="autoWidth"]/tbody/tr['
+            "5]/td/table/tbody/tr[{}]/td[4]".format(connection_index),
+        ).text
 
-        connection_sent_packets = driver.find_element(By.XPATH,
-                                                      '//*[@id="autoWidth"]/tbody/tr[5]/td/table/tbody/tr[{}]/td[5]'.
-                                                      format(connection_index)).text
-        result_usage_dict["{}".format(connection)] = [connection_received_packets, connection_sent_packets]
+        connection_sent_packets = driver.find_element(
+            By.XPATH,
+            '//*[@id="autoWidth"]/tbody/tr[5]/td/table/tbody/tr[{}]/td[5]'.format(
+                connection_index
+            ),
+        ).text
+        result_usage_dict["{}".format(connection)] = [
+            connection_received_packets,
+            connection_sent_packets,
+        ]
     return jsonify(result_usage_dict), 200
 
 
@@ -106,9 +176,8 @@ def create_output_json(data_usage):
         json.dump(data_usage, outfile)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    res = get_ip()
     init_and_login()
     app.run(host="0.0.0.0", port=serverPort)
-    #limit_upload_download_speed(download_speed='2049', upload_speed='513')
-    #print_general_packets_data()
     driver.quit()

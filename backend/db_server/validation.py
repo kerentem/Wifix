@@ -1,3 +1,4 @@
+import ipaddress
 import re
 from datetime import datetime
 
@@ -11,20 +12,22 @@ from mysql_util.mysql_exception import (
 )
 
 
-def validate_register_request(full_name: str, password: str, email: str):
-
-    validate_full_name(full_name)
+def validate_register_request(password: str, email: str, ip: str = None):
     validate_strong_password(password)
     validate_email(email)
+    if ip:
+        validate_ip(ip)
+
+
+def validate_ip(ip: str):
+    ipaddress.ip_address(ip)
 
 
 def validate_token(token):
     if token != "46d5d479-5a07-4767-9847-516f04d78fbd":
-        raise InvalidEmailException("Sorry, you need a valid token to register as admin")
-
-
-def validate_full_name(full_name: str):
-    pass
+        raise InvalidEmailException(
+            "Sorry, you need a valid token to register as admin"
+        )
 
 
 def validate_email(email: str):

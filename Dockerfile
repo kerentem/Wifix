@@ -8,7 +8,7 @@ WORKDIR /wifix
 
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-
+RUN mkdir /logs
 # Copy the rest of the application code to the container
 COPY .. .
 
@@ -16,4 +16,4 @@ COPY .. .
 EXPOSE 8080
 
 # Start the Flask application
-CMD ["python", "backend/db_server/app.py"]
+CMD ["python3", "backend/db_server/app.py"]

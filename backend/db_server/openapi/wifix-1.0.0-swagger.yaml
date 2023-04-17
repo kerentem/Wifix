@@ -2,12 +2,112 @@ openapi: 3.0.0
 info:
   version: 1.0.0
   title: WiFix API
+
 servers:
-  - url: http://18.200.177.9:8080
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/BARSELA/wifix/1.0.0
+
+  - description: Router Server
+    url: http://127.0.0.1:9285
+
+  - description: DB Server
+    url: http://18.200.177.9:8080
+
+tags:
+  - name: Admin
+    description: WiFix admin endpoints
+  - name: User
+    description: WiFix user endpoints
+  - name: Router
+    description: WiFix user endpoints
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        data:
+          type: object
+        error:
+          type: boolean
+        error_message:
+          type: string
+        message:
+          type: string
+
+  examples:
+    UserRegisterResponseExample:
+      value:
+        data: null
+        error: false
+        error_message: null
+        message: "User registered successfully"
+
+    UserLoginResponseExample:
+      value:
+        data:
+          is_email_registered: true
+        error: false
+        error_message: null
+        message: ""
+
+    UserStartWifiSessionResponseExample:
+      value:
+        data: null
+        error: false
+        error_message: null
+        message: "Added WiFi session to user: bs52952@gmail.com successfully"
+
+    UserIsWifiSessionExpiredResponseExample:
+      value:
+        data:
+          is_expired: false
+        error: false
+        error_message: null
+        message: "Wifi session is not expired for email: bs52952@gmail.com"
+
+    UserWifiSessionTimeLeft:
+      value:
+        data:
+          end_session_time_timestamp: 1681547401
+        error: false
+        error_message: null
+        message: ""
+
+
+    AdminRegisterResponseExample:
+      value:
+        data: null
+        error: false
+        error_message: null
+        message: "Admin registered successfully"
+
+    AdminLoginResponseExample:
+      value:
+        data:
+          is_email_registered: true
+        error: false
+        error_message: null
+        message: ""
+
+    AdminGetCurrentBalanceResponseExample:
+      value:
+        data:
+          dan: sela
+        error: true
+        error_message: aaaaaa
+        message: ""
 
 paths:
   /register:
     post:
+      tags:
+        - User
       summary: Register a new user
       requestBody:
         required: true
@@ -29,16 +129,20 @@ paths:
                 - email
       responses:
         '200':
-          description: User registered successfully
-        '400':
-          description: Bad request - missing required fields
-        '409':
-          description: Conflict - email already registered
-        '500':
-          description: Internal server error
-          
+          description: Success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - "$ref": "#/components/schemas/ApiResponse"
+              examples:
+                response:
+                  "$ref": '#/components/examples/UserRegisterResponseExample'
+
   /login:
     post:
+      tags:
+        - User
       summary: Check if a user is registered
       description: |
         This endpoint checks if a user is registered in the system by their email address.
@@ -61,41 +165,20 @@ paths:
                 - password
       responses:
         '200':
-          description: User registration status
+          description: Success
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "User registered"
-                  is_email_registered:
-                    type: boolean
-                    example: true
-        '400':
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Invalid request: missing email"
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Internal server error"
+                oneOf:
+                  - "$ref": "#/components/schemas/ApiResponse"
+              examples:
+                response:
+                  "$ref": '#/components/examples/UserLoginResponseExample'
 
   /wifi_session/start:
     post:
+      tags:
+        - User
       summary: Start a new WiFi session for a user.
       requestBody:
         required: true
@@ -112,101 +195,27 @@ paths:
                   type: integer
                   description: The duration of the WiFi session in minutes.
                   example: 60
-                data_usage:
+                price:
                   type: integer
-                  description: The amount of data used in the WiFi session in bytes.
-                  example: 5000000
-                start_time:
-                  type: object
-                  description: The start time of the WiFi session.
-                  properties:
-                    date:
-                      type: string
-                      description: The date of the start time in YYYY-MM-DD format.
-                      example: 2023-03-22
-                    time:
-                      type: string
-                      description: The time of the start time in HH:MM:SS format.
-                      example: 14:30:00
+                  description: WiFi session price.
+                  example: 100
+
       responses:
         '200':
-          description: The WiFi session was started successfully.
+          description: Success
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: A message indicating that the WiFi session was started successfully.
-                    example: Added WiFi session to user- user@example.com successfully
-                  data:
-                    type: object
-                    description: An empty object.
-                    example: {}
-        '400':
-          description: Bad request. The request was missing required parameters or contained invalid values.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: A message indicating that the request was invalid.
-                    example: Invalid request. Please provide valid parameters.
-                  data:
-                    type: object
-                    description: An empty object.
-                    example: {}
-        '401':
-          description: Unauthorized. The user is not registered.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: A message indicating that the user is not registered.
-                    example: User not registered
-                  data:
-                    type: object
-                    description: An object containing the is_email_registered parameter set to false.
-                    example: {"is_email_registered": false}
-        '409':
-          description: Conflict. The user already has an active WiFi session.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: A message indicating that the user already has an active WiFi session.
-                    example: There is a wifi session for the user
-                  data:
-                    type: object
-                    description: An empty object.
-                    example: {}
-        '500':
-          description: Internal server error. An error occurred while processing the request.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: A message indicating that an error occurred while processing the request.
-                    example: An error occurred while starting the WiFi session.
-                  data:
-                    type: object
-                    description: An empty object.
-                    example: {}
+                oneOf:
+                  - "$ref": "#/components/schemas/ApiResponse"
+              examples:
+                response:
+                  "$ref": '#/components/examples/UserStartWifiSessionResponseExample'
 
   /wifi_session/is_expired:
     get:
+      tags:
+        - User
       summary: Check if WiFi session is expired for a user
       parameters:
         - in: query
@@ -218,7 +227,214 @@ paths:
 
       responses:
         '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - "$ref": "#/components/schemas/ApiResponse"
+              examples:
+                response:
+                  "$ref": '#/components/examples/UserIsWifiSessionExpiredResponseExample'
+
+  /wifi_session/time_left:
+    get:
+      tags:
+        - User
+      summary: Get End Session Time
+      description: Retrieve the end session time.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - "$ref": "#/components/schemas/ApiResponse"
+              examples:
+                response:
+                  "$ref": '#/components/examples/UserWifiSessionTimeLeft'
+
+  /admin/register:
+    post:
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                company_name:
+                  type: string
+                  description: The name of the company making the request
+                  example: Acme Inc.
+                token:
+                  type: string
+                  description: The authentication token for the request
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                full_name:
+                  type: string
+                password:
+                  type: string
+                email:
+                  type: string
+                  format: email
+              required:
+                - full_name
+                - password
+                - email
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - "$ref": "#/components/schemas/ApiResponse"
+              examples:
+                response:
+                  "$ref": '#/components/examples/AdminRegisterResponseExample'
+
+  /admin/login:
+    post:
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      summary: Check if a user is registered
+      description: |
+        This endpoint checks if a user is registered in the system by their email address.
+      requestBody:
+        description: User's email address
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                company_name:
+                  type: string
+                  description: The name of the company making the request
+                  example: Acme Inc.
+                token:
+                  type: string
+                  description: The authentication token for the request
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                email:
+                  type: string
+                  example: john.doe@example.com
+                password:
+                  type: string
+                  example: Aa123456789
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - "$ref": "#/components/schemas/ApiResponse"
+              examples:
+                response:
+                  "$ref": '#/components/examples/AdminLoginResponseExample'
+
+  /admin/get_current_balance:
+    post:
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      summary: Get the current balance for a given date range
+      requestBody:
+        description: The date range to retrieve the current balance for
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                company_name:
+                  type: string
+                  description: The name of the company making the request
+                  example: Acme Inc.
+                token:
+                  type: string
+                  description: The authentication token for the request
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                email:
+                  type: string
+                  format: email
+                from_date:
+                  type: string
+                  format: date
+                  pattern: "^\\d{2}/\\d{2}/\\d{4}$"
+                  description: The start date of the ran (dd/mm/yyyy)
+                to_date:
+                  type: string
+                  format: date
+                  pattern: "^\\d{2}/\\d{2}/\\d{4}$"
+                  description: The end date of the range (dd/mm/yyyy)
+              required:
+                - from_date
+                - to_date
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - "$ref": "#/components/schemas/ApiResponse"
+              examples:
+                response:
+                  "$ref": '#/components/examples/AdminGetCurrentBalanceResponseExample'
+
+
+  /change_speed:
+    post:
+      tags:
+        - Router
+      summary: Limit Upload and Download Speed
+      description: Limits the upload and download speed of a client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - client_ip
+                - upload_speed
+                - download_speed
+              properties:
+                client_ip:
+                  type: string
+                  description: IP address of the client to limit the speed for
+                upload_speed:
+                  type: number
+                  minimum: 1
+                  description: Maximum upload speed limit in Mbps
+                download_speed:
+                  type: number
+                  minimum: 1
+                  description: Maximum download speed limit in Mbps
+              example:
+                client_ip: "192.168.0.100"
+                upload_speed: 5
+                download_speed: 10
+      responses:
+        200:
           description: OK
+        400:
+          description: Bad Request
           content:
             application/json:
               schema:
@@ -226,18 +442,24 @@ paths:
                 properties:
                   message:
                     type: string
-                    description: A message about whether the WiFi session is expired or not
-                  data:
-                    type: object
-                    properties:
-                      is_expired:
-                        type: boolean
-                        description: Whether the WiFi session is expired or not
-                example:
-                  message: Wifi session is expired for email- example@example.com
-                  data:
-                    is_expired: true
-        '400':
-          description: Invalid request
-        '500':
-          description: Internal server error
+                    description: Error message
+      x-swagger-router-controller: app
+      operationId: limit_upload_download_speed
+  /user_ip:
+    get:
+      tags:
+        - Router
+      summary: Get User IP
+      description: Returns the IP address of the user making the request
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ip:
+                    type: string
+      x-swagger-router-controller: app
+      operationId: get_ip

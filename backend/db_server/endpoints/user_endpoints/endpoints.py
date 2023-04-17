@@ -2,51 +2,85 @@ from typing import Optional
 import datetime
 from flask_bcrypt import generate_password_hash
 from utiles import make_db_server_response, HttpStatus
-from validation import validate_register_request, validate_credit_card
+from validation import validate_register_request, validate_credit_card, validate_ip
+
+from welcome_email.email_client import EmailClient
+
+from sqlalchemy_handler.db_models import WifiSession
+
+EMAIL: bool = False
 
 
 class User:
-
     def __init__(self, db_handler):
         self.db_handler = db_handler
+        if EMAIL:
+            self.email_client = EmailClient()
 
     def register(self, data):
         # Get the user's registration information from the request
         full_name: str = data["full_name"]
         password: str = data["password"]
         email: str = data["email"]
+        ip: str = data["ip"]
+        company_name: str = data["company_name"]
 
-        validate_register_request(full_name, password, email)
+        validate_register_request(password, email, ip)
 
         hashed_password: str = generate_password_hash(password)
 
-        self.db_handler.register(
-            full_name=full_name, email=email, hashed_password=hashed_password
-        )
+        try:
+            self.db_handler.register(
+                full_name=full_name,
+                email=email,
+                hashed_password=hashed_password,
+                ip=ip,
+                company_name=company_name,
+            )
 
-        msg = "User registered successfully"
-        response = make_db_server_response(HttpStatus.OK, msg, {})
+            if EMAIL:
+                self.email_client.send_email(to=email)
 
-        return response
+            msg = "User registered successfully"
+            response = make_db_server_response(HttpStatus.OK, msg, {})
+
+            return response
+
+        except Exception as e:
+            error_msg = str(e)
+            error_response = make_db_server_response(HttpStatus.OK, "", {}, error_msg)
+            return error_response
 
     def login(self, data):
         email: str = data["email"]
         password: str = data["password"]
+        ip: str = data["ip"]
+        company_name: str = data["company_name"]
 
-        is_user_registered_response: bool = self.db_handler.is_user_registered(
-            email=email, password=password
-        )
+        validate_ip(ip)
 
-        if is_user_registered_response:
-            response = make_db_server_response(
-                HttpStatus.OK, "User registered", {"is_email_registered": True}
-            )
-        else:
-            response = make_db_server_response(
-                HttpStatus.OK, "User not registered", {"is_email_registered": False}
+        try:
+            is_user_registered_response: bool = self.db_handler.is_user_registered(
+                email=email, password=password, company_name=company_name
             )
 
-        return response
+            self.db_handler.set_user_ip(email=email, user_ip=ip)
+
+            if is_user_registered_response:
+                response = make_db_server_response(
+                    HttpStatus.OK, "User registered", {"is_email_registered": True}
+                )
+            else:
+                response = make_db_server_response(
+                    HttpStatus.OK, "User not registered", {"is_email_registered": False}
+                )
+
+            return response
+
+        except Exception as e:
+            error_msg = str(e)
+            error_response = make_db_server_response(HttpStatus.OK, "", {}, error_msg)
+            return error_response
 
     def add_card(self, data):
         card_number: str = data["card_number"]
@@ -60,27 +94,40 @@ class User:
         # Hash CVV before storing in database
         hashed_cvv = generate_password_hash(str(cvv))
 
-        self.db_handler.add_credit_card(
-            card_number=card_number,
-            expiration_month=expiration_month,
-            expiration_year=expiration_year,
-            hashed_cvv=hashed_cvv,
-            email=email,
-        )
+        try:
+            self.db_handler.add_credit_card(
+                card_number=card_number,
+                expiration_month=expiration_month,
+                expiration_year=expiration_year,
+                hashed_cvv=hashed_cvv,
+                email=email,
+            )
 
-        msg = "User added credit card successfully"
-        response = make_db_server_response(HttpStatus.OK, msg, {})
+            msg = "User added credit card successfully"
+            response = make_db_server_response(HttpStatus.OK, msg, {})
 
-        return response
+            return response
+
+        except Exception as e:
+            error_msg = str(e)
+            error_response = make_db_server_response(HttpStatus.OK, "", {}, error_msg)
+            return error_response
 
     def start_wifi_session(self, data):
         email: str = data["email"]
         price: int = data["price"]
-        end_time_in_min: int = data["end_time_in_min"]
-        data_usage: Optional[int] = data.get("data_usage") if data.get("data_usage") else 0
+        ip: str = data["ip"]
+        company_name: str = data["company_name"]
 
-        if not self.db_handler.is_wifi_session_expired(email):
-            raise Exception("There is a wifi session for the user")
+        end_time_in_min: int = data["end_time_in_min"]
+        data_usage: Optional[int] = (
+            data.get("data_usage") if data.get("data_usage") else 0
+        )
+
+        if not self.db_handler.is_wifi_session_expired(email, company_name):
+            error_msg = "There is a wifi session for the user"
+            error_response = make_db_server_response(HttpStatus.OK, "", {}, error_msg)
+            return error_response
 
         if data.get("start_time"):
             date_start_str = data["start_time"]["date"]
@@ -93,38 +140,78 @@ class User:
 
         end_time: datetime = start_time + datetime.timedelta(minutes=end_time_in_min)
 
-        start_time = start_time.timestamp()
-        end_time = end_time.timestamp()
+        start_time = int(start_time.timestamp())
+        end_time = int(end_time.timestamp())
 
         # Inserting the data to the wifi_session table and payment table
-        self.db_handler.start_wifi_session(email, start_time, end_time, data_usage)
         try:
-            self.db_handler.insert_payment(email, price)
+            self.db_handler.set_user_ip(email, ip)
+            self.db_handler.start_wifi_session(
+                email, start_time, end_time, data_usage, company_name
+            )
+            try:
+                self.db_handler.insert_payment(email, price)
+            except Exception as e:
+                self.db_handler.remove_wifi_session(
+                    email, start_time, end_time, company_name
+                )
+
+                error_response = make_db_server_response(HttpStatus.OK, "", {}, str(e))
+                return error_response
+
+            msg = f"Added WiFi session to user: {email} successfully"
+            response = make_db_server_response(HttpStatus.OK, msg, {})
+
+            return response
+
         except Exception as e:
-            self.db_handler.remove_wifi_session(email, int(start_time), int(end_time))
-            raise e
-
-        msg = f"Added WiFi session to user: {email} successfully"
-        response = make_db_server_response(HttpStatus.OK, msg, {})
-
-        return response
+            error_response = make_db_server_response(HttpStatus.OK, "", {}, str(e))
+            return error_response
 
     def is_wifi_session_expired_endpoint(self, data):
-        email = data["email"]
+        email: str = data["email"]
+        company_name: str = data["company_name"]
 
-        _is_email_registered: bool = self.db_handler.is_email_registered(email)
-        if not _is_email_registered:
-            raise InvalidUsernameException("User not registered")
+        try:
+            is_expired = self.db_handler.is_wifi_session_expired(email, company_name)
 
-        is_expired = self.db_handler.is_wifi_session_expired(email)
+            if is_expired:
+                msg = f"Wifi session is expired for email: {email}, company_name: {company_name}"
+            else:
+                msg = f"Wifi session is not expired for email: {email}, company_name: {company_name}"
 
-        if is_expired:
-            msg = f"Wifi session is expired for email: {email}"
-        else:
-            msg = f"Wifi session is not expired for email: {email}"
+            data = {"is_expired": is_expired}
 
-        data = {"is_expired": is_expired}
+            response = make_db_server_response(HttpStatus.OK, msg, data)
 
-        response = make_db_server_response(HttpStatus.OK, msg, data)
+            return response
 
-        return response
+        except Exception as e:
+            error_msg = str(e)
+            error_response = make_db_server_response(HttpStatus.OK, "", {}, error_msg)
+            return error_response
+
+    def get_end_session_time(self, data) -> float:
+        email: str = data["email"]
+        company_name: str = data["company_name"]
+
+        try:
+            wifi_session: WifiSession = self.db_handler.get_wifi_session_expired(
+                email, company_name
+            )
+
+            if wifi_session:
+                response = {"end_session_time_timestamp": wifi_session.end_time}
+                return make_db_server_response(
+                    HttpStatus.OK,
+                    "",
+                    response,
+                )
+            else:
+                error_msg: str = "There isn't wifi session for the user"
+                return make_db_server_response(HttpStatus.OK, "", {}, error_msg)
+
+        except Exception as e:
+            error_msg = str(e)
+            error_response = make_db_server_response(HttpStatus.OK, "", {}, error_msg)
+            return error_response

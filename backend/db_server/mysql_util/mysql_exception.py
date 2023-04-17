@@ -12,6 +12,7 @@ class InvalidTokenException(ValueError):
         msg = error_msg if error_msg else "Invalid token"
         super().__init__(msg)
 
+
 class InvalidEmailException(ValueError):
     def __init__(self, error_msg: Optional[str] = None):
         msg = error_msg if error_msg else "Invalid email"
