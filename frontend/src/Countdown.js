@@ -1,16 +1,24 @@
 import React, { useEffect, useState } from 'react';
+import axios from "axios";
 import './style/Countdown.css';
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 
 function CountdownTimer() {
     const navigate = useNavigate();
+    const location = useLocation();
+
     const [targetTime, setTargetTime] = useState(null);
     const [countdown, setCountdown] = useState('Loading...');
 
     useEffect(() => {
         const fetchData = async () => {
-            const response = await fetch('https://example.com/target-time');
-            const targetTime = new Date(await response.text());
+            const response = await axios.get('http://18.200.177.9:8080/wifi_session/time_left', {
+                params: {
+                    "email": location.state.mail,
+                    "company_name": "bar_test"
+                }
+            });
+            const targetTime = new Date(response.data["end_session_time_timestamp"]);
             setTargetTime(targetTime);
         };
 
@@ -18,6 +26,7 @@ function CountdownTimer() {
     }, []);
 
     useEffect(() => {
+        console.log(targetTime)
         if (targetTime) {
             const intervalId = setInterval(() => {
                 const now = new Date();
