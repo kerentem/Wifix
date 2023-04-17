@@ -26,7 +26,7 @@ export default function (props) {
             "email": mail
         })
             .then( (response) => {
-                navigate("/menu");
+                navigate(`/menu`, { state: { mail }});
             })
             .catch( (error) => {
 

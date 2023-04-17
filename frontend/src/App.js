@@ -13,7 +13,7 @@ function App() {
                 <Route path="/" element={<Auth />} />
                 <Route path="/menu" element={<OurPlans/>} />
                 <Route path="/countdown" element={<CountdownTimer/>} />
-                <Route path="/manage" element={<ManagerScreen/>} />
+                <Route path="/manager" element={<ManagerScreen/>} />
                 <Route path='*' element={<Navigate to='/' />} />
             </Routes>
         </BrowserRouter>
