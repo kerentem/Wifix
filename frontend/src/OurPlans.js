@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import "./style/OurPlans.css"
 import {useNavigate, useLocation} from "react-router-dom";
 import axios from "axios";
@@ -29,27 +29,40 @@ const plans = [
 ];
 
 const OurPlans = () => {
+    const [ip, setIP] = useState();
     const navigate = useNavigate();
     const location = useLocation();
+
+    const getData = async () => {
+        const res = await axios.get("https://api.ipify.org/?format=json");
+        console.log(res.data);
+        setIP(res.data.ip);
+    };
+
+    useEffect(() => {
+        getData();
+    }, []);
 
     const handleClick = async (param) => {
 
         const confirmed = window.confirm('Are you sure you want to proceed?');
         const mail = location.state.mail;
-        const ip = location.state.ip;
 
         if (confirmed) {
-            await axios.post('http://18.200.177.9:8080/wifi_session/start', {
-                "email": mail,
-                "end_time_in_min": plans[param + 1].minutes,
-                "price": plans[param + 1].price,
-                "ip": ip,
-                "company_name": "bar_test"
-            });
-            navigate("/countdown", { state: { mail }})
+            console.log(ip)
+            axios.post('http://18.200.177.9:8080/wifi_session/start', {
+                 "email": mail,
+                 "end_time_in_min": plans[param - 1].minutes,
+                 "price": plans[param - 1].price,
+                 "ip": ip,
+                 "company_name": "bar_test"
+             })
+                .then( (response) => {
+                    navigate("/countdown", { state: { mail }})
+                });
         }
-
     };
+
     return (
         <div className="plans-container">
             <h1>Our Plans</h1>
