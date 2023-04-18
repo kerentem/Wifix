@@ -54,10 +54,11 @@ def init_and_login():
 
 @app.route("/change_speed", methods=["POST"])
 def limit_upload_download_speed():
-    input_json_object = request.get_json(force=True)
-    client_ip = input_json_object["client_ip"]
-    upload_speed = input_json_object["upload_speed"]
-    download_speed = input_json_object["download_speed"]
+    input_json_object: str = request.get_json(force=True)
+    client_ip: str = input_json_object["client_ip"]
+    upload_speed: str = input_json_object["upload_speed"]
+    download_speed: str = input_json_object["download_speed"]
+    company_name: str = input_json_object["company_name"]
     # Find the router's information
     driver.switch_to.frame("bottomLeftFrame")
     driver.find_element(By.XPATH, '//*[@id="a38"]').click()
@@ -131,7 +132,7 @@ def print_general_packets_data():
 
 
 @app.route("/data_feed", methods=["GET"])
-def get_wireless_customer_data():
+def get_wireless_customer_data() -> tuple:
     global LIVE_USERS
     driver.switch_to.default_content()
     driver.switch_to.frame("bottomLeftFrame")
@@ -169,11 +170,6 @@ def get_wireless_customer_data():
 def get_amount_users():
     result = {"result": LIVE_USERS}
     return jsonify(result), 200
-
-
-def create_output_json(data_usage):
-    with open("users_data.json", "w") as outfile:
-        json.dump(data_usage, outfile)
 
 
 if __name__ == "__main__":
