@@ -7,7 +7,7 @@ import threading
 import requests
 from validation import validate_ip
 
-ROUTER_SERVER_URL = "http://127.0.0.1:9285"
+ROUTER_SERVER_URL = "http://192.168.0.100:9285"
 
 
 class Manager:
