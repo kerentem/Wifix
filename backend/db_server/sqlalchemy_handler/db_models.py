@@ -86,10 +86,10 @@ class WifiSession(Base):
 class WifiSessionHistory(Base):
     __tablename__ = "wifi_sessions_history"
     id = Column(Integer, primary_key=True)
-    email = Column(String(255), nullable=False)
+    email = Column(String(255), ForeignKey("users.email"), nullable=False)
     start_time = Column(Integer, nullable=False)
     end_time = Column(Integer, nullable=False)
-    company_name = Column(String(255), nullable=False)
+    company_name = Column(String(255), ForeignKey("user_companies.company_name"), nullable=False)
 
 
 @listens_for(WifiSession, "after_insert")
