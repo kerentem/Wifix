@@ -1,5 +1,4 @@
 import psutil
-import json
 from selenium import webdriver
 from flask import Flask, request, jsonify
 from selenium.webdriver.common.by import By
@@ -9,7 +8,6 @@ ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "admin"
 LIVE_USERS: int = 0
 request_number = []
-BASE_URL = "http://{}:{}/{}"
 hostName = "0.0.0.0"
 serverPort = 9285
 
@@ -18,13 +16,12 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    return "Hello Geeks!!"
+    return "Hello!!"
 
 
 @app.route("/get_my_ip", methods=["GET"])
 def get_my_ip():
     client_ip = request.environ.get("REMOTE_ADDR")
-    # return ['Your IP is: {}'.format(client_ip)]
     return jsonify({"ip": client_ip}), 200
 
 
@@ -36,29 +33,37 @@ def get_ip():
 
 def init_and_login():
     # Navigate to the router's web interface
-    driver.get("http://192.168.0.1")
+    try:
+        driver.get("http://192.168.0.1")
 
-    # Find the username and password fields and fill them in
-    username_field = driver.find_element(By.ID, "userName")
-    username_field.send_keys(ADMIN_USERNAME)
-    password_field = driver.find_element(By.ID, "pcPassword")
-    password_field.send_keys(ADMIN_PASSWORD)
+        # Find the username and password fields and fill them in
+        username_field = driver.find_element(By.ID, "userName")
+        username_field.send_keys(ADMIN_USERNAME)
+        password_field = driver.find_element(By.ID, "pcPassword")
+        password_field.send_keys(ADMIN_PASSWORD)
 
-    # Find the login button and click it
-    login_button = driver.find_element(By.ID, "loginBtn")
-    login_button.click()
+        # Find the login button and click it
+        login_button = driver.find_element(By.ID, "loginBtn")
+        login_button.click()
 
-    # Wait for the page to load
-    driver.implicitly_wait(10)
+        # Wait for the page to load
+        driver.implicitly_wait(10)
+    except Exception as e:
+        print(f"An error occurred while initializing and logging in: {e}")
 
 
 @app.route("/change_speed", methods=["POST"])
 def limit_upload_download_speed():
     input_json_object: str = request.get_json(force=True)
-    client_ip: str = input_json_object["client_ip"]
-    upload_speed: str = input_json_object["upload_speed"]
-    download_speed: str = input_json_object["download_speed"]
-    company_name: str = input_json_object["company_name"]
+    try:
+        client_ip: str = input_json_object["client_ip"]
+        upload_speed: str = input_json_object["upload_speed"]
+        download_speed: str = input_json_object["download_speed"]
+        company_name: str = input_json_object["company_name"]
+    except Exception as e:
+        print(f"An error occurred while reading json data input: {e}")
+        result = {"result": "Json Error"}
+        return jsonify(result), 405
     # Find the router's information
     driver.switch_to.frame("bottomLeftFrame")
     driver.find_element(By.XPATH, '//*[@id="a38"]').click()
@@ -112,6 +117,7 @@ def limit_upload_download_speed():
     driver.find_element(
         By.XPATH, '//*[@id="autoWidth"]/tbody/tr[5]/td/input[1]'
     ).click()
+    driver.refresh()
     result = {"result": "SUCCESS"}
     return jsonify(result), 200
 
@@ -163,6 +169,7 @@ def get_wireless_customer_data() -> tuple:
             connection_received_packets,
             connection_sent_packets,
         ]
+    driver.refresh()
     return jsonify(result_usage_dict), 200
 
 
@@ -173,7 +180,6 @@ def get_amount_users():
 
 
 if __name__ == "__main__":
-    res = get_ip()
     init_and_login()
     app.run(host="0.0.0.0", port=serverPort)
     driver.quit()
