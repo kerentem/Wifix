@@ -66,9 +66,9 @@ class Manager:
             error_response = make_db_server_response(HttpStatus.OK, "", {}, error_msg)
             return error_response
 
-    def update_wifi_speed(self, company: str):
+    def update_wifi_speed(self, company: str, is_cron: bool = False):
         clients_ips: Dict[str, Dict[str, int]] = self._get_users_ip(company)
-        company_speeds = self._get_company_speeds(company)
+        company_speeds = self.get_company_speeds(company, self.db_handler)
 
         for ip in clients_ips.keys():
             validate_ip(ip)
@@ -80,28 +80,33 @@ class Manager:
                 client_speeds = clients_ips.get("client_ip")
                 if client_speeds:
                     if (
-                        client_speeds["upload_speed"]
-                        != company_speeds.premium_upload_speed
-                        or clients_ips["client_ip"]["download_speed"]
-                        != company_speeds.premium_download_speed
+                            client_speeds["upload_speed"]
+                            != company_speeds.premium_upload_speed
+                            or clients_ips["client_ip"]["download_speed"]
+                            != company_speeds.premium_download_speed
                     ):
                         self.change_user_speed(
                             ip=client_ip,
                             upload_speed=company_speeds.premium_upload_speed,
                             download_speed=company_speeds.premium_download_speed,
+                            is_cron=is_cron,
                         )
             else:
                 self.change_user_speed(
                     ip=client_ip,
                     upload_speed=company_speeds.regular_upload_speed,
                     download_speed=company_speeds.regular_download_speed,
+                    is_cron=is_cron,
                 )
 
     @staticmethod
-    def change_user_speed(ip, upload_speed, download_speed):
+    def change_user_speed(ip, upload_speed, download_speed, is_cron: bool = True):
         def request_task(url, json):
-            # requests.post(url, json=json)
-            pass
+            try:
+                response = requests.post(url, json=json, timeout=10)
+                return response
+            except:
+                pass
 
         def fire_and_forget(url, json):
             threading.Thread(target=request_task, args=(url, json)).start()
@@ -114,7 +119,10 @@ class Manager:
             "download_speed": download_speed,
         }
 
-        fire_and_forget(url, json=request)
+        if is_cron:
+            fire_and_forget(url, json=request)
+        else:
+            return request_task(url, json=request)
 
     @staticmethod
     def _get_users_ip(company: str) -> Dict[str, Dict[str, int]]:
@@ -126,8 +134,9 @@ class Manager:
 
         return clients_ips
 
-    def _get_company_speeds(self, company: str):
-        response = self.db_handler.get_company_speeds(company)
+    @classmethod
+    def get_company_speeds(cls, company: str, db_handler):
+        response = db_handler.get_company_speeds(company)
         return response
 
     def get_companies(self) -> List[str]:

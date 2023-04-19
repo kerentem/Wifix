@@ -10,8 +10,8 @@ def _create_update_speed_thread(manager: Manager):
     while True:
         companies: List[str] = manager.get_companies()
         for company in companies:
-            logger.info(f"Cron - updating wifi speeds for company: {company}")
-            manager.update_wifi_speed(company)
+            logger.info(f"updating wifi speeds for company: {company}")
+            manager.update_wifi_speed(company=company, is_cron=True)
 
         time.sleep(300)
 
