@@ -56,12 +56,15 @@ def init_and_login():
 def limit_upload_download_speed():
     input_json_object: str = request.get_json(force=True)
     try:
-        client_ip: str = input_json_object["client_ip"]
-        upload_speed: str = input_json_object["upload_speed"]
-        download_speed: str = input_json_object["download_speed"]
         company_name: str = input_json_object["company_name"]
     except Exception as e:
-        print(f"An error occurred while reading json data input: {e}")
+        company_name: str = ""
+    try:
+        ip: str = input_json_object["ip"]
+        upload_speed: str = input_json_object["upload_speed"]
+        download_speed: str = input_json_object["download_speed"]
+    except Exception as e:
+        print(f"An error occurred while reading json data input: {e} + {input_json_object}")
         result = {"result": "Json Error"}
         return jsonify(result), 405
     # Find the router's information
@@ -77,7 +80,7 @@ def limit_upload_download_speed():
         By.XPATH, '//*[@id="autoWidth"]/tbody/tr[3]/td/table/tbody/tr[2]/td[2]/input[1]'
     )
     ip_range.clear()
-    ip_range.send_keys(client_ip)
+    ip_range.send_keys(ip)
     port_range_from = driver.find_element(
         By.XPATH,
         "/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[3]/td[2]/input[1]",
