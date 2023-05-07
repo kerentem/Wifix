@@ -77,7 +77,7 @@ def init_and_login():
 
 
 @app.route("/remove_user", methods=["POST"])
-def cancel_limit_user():
+def remove_user():
     global ACTIVE_USERS
     global UNLIMITED_USERS
     input_json_object: str = request.get_json(force=True)
@@ -129,7 +129,7 @@ def cancel_limit_user():
         except Exception as e:
             result = {"result": "Wrong IP"}
             driver.refresh()
-            return jsonify(result), 200
+            return jsonify(result), 405
 
 
 def limit_upload_download_speed(ip, upload_speed, download_speed, company_name):
