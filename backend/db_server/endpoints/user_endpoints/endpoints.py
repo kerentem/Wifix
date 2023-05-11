@@ -8,6 +8,8 @@ from welcome_email.email_client import EmailClient
 
 from sqlalchemy_handler.db_models import WifiSession
 
+from endpoints.manager_endpoints.endpoints import Manager
+
 EMAIL: bool = False
 
 
@@ -158,6 +160,12 @@ class User:
 
                 error_response = make_db_server_response(HttpStatus.OK, "", {}, str(e))
                 return error_response
+
+            company_speeds = Manager.get_company_speeds(company_name, self.db_handler)
+            Manager.change_user_speed(ip=ip,
+                                      upload_speed=company_speeds.premium_upload_speed,
+                                      download_speed=company_speeds.premium_download_speed,
+                                      is_cron=False, )
 
             msg = f"Added WiFi session to user: {email} successfully"
             response = make_db_server_response(HttpStatus.OK, msg, {})
