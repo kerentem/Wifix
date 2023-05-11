@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/wifix/static/css/main.fdb99ba5.css",
+    "main.js": "/wifix/static/js/main.ba6cad8f.js",
+    "static/js/787.cda612ba.chunk.js": "/wifix/static/js/787.cda612ba.chunk.js",
+    "static/media/background.jpg": "/wifix/static/media/background.f42ecb4bc8e4c4ed24be.jpg",
+    "static/media/logo-no-background.png": "/wifix/static/media/logo-no-background.5471eb280a29e858e4f7.png",
+    "index.html": "/wifix/index.html",
+    "main.fdb99ba5.css.map": "/wifix/static/css/main.fdb99ba5.css.map",
+    "main.ba6cad8f.js.map": "/wifix/static/js/main.ba6cad8f.js.map",
+    "787.cda612ba.chunk.js.map": "/wifix/static/js/787.cda612ba.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.fdb99ba5.css",
+    "static/js/main.ba6cad8f.js"
+  ]
+}
