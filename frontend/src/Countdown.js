@@ -7,47 +7,47 @@ function CountdownTimer() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [targetTime, setTargetTime] = useState(null);
+    const [targetTime, setTargetTime] = useState(1683805593);
     const [countdown, setCountdown] = useState('Loading...');
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const response = await axios.get('http://18.200.177.9:8080/wifi_session/time_left', {
-                params: {
-                    "email": location.state.mail,
-                    "company_name": "bar_test"
-                }
-            });
-            const targetTime = new Date(response.data["end_session_time_timestamp"]);
-            setTargetTime(targetTime);
-        };
 
-        fetchData();
-    }, []);
 
     useEffect(() => {
+        const mail = location.state.mail
+        const response = axios.get('http://18.200.177.9:8080/wifi_session/time_left', {
+            params: {
+                "email": mail ,
+                "company_name": "bar_test"
+            }
+        })
+            .then((response) => {
+                if(response.data.error)
+                    navigate("/menu", { mail });
+            })
+
+        const targetTime = response.data.data["end_session_time_timestamp"];
+        setTargetTime(targetTime);
+
         console.log(targetTime)
         if (targetTime) {
             const intervalId = setInterval(() => {
-                const now = new Date();
-                const timeRemaining = targetTime - now;
-
+                const now = new Date().getTime() / 1000;
+                console.log(now)
+                const timeRemaining = Math.abs(targetTime - now);
+                console.log(timeRemaining)
                 if (timeRemaining < 0) {
                     clearInterval(intervalId);
                     setCountdown('Countdown finished!');
                     navigate("/menu");
                 } else {
-                    const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                    const hours = Math.floor(timeRemaining / 3600);
+                    const minutes = Math.floor((timeRemaining % 3600) / 60);
+                    const seconds = Math.floor(timeRemaining % 60);
 
                     setCountdown(
                         <div>
                             <h1>Time left for wifi session:</h1>
                         <div id="countdown">
-                            <span className="count">{days}</span>
-                            <span className="divider">:</span>
                             <span className="count">{hours}</span>
                             <span className="divider">:</span>
                             <span className="count">{minutes}</span>
