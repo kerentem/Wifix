@@ -104,6 +104,7 @@ class Manager:
         def request_task(url, json):
             try:
                 response = requests.post(url, json=json, timeout=10)
+                request.get(routine_limit_URL)
                 return response
             except:
                 pass
@@ -112,6 +113,7 @@ class Manager:
             threading.Thread(target=request_task, args=(url, json)).start()
 
         url = ROUTER_SERVER_URL + "/change_speed"
+        routine_limit_URL = ROUTER_SERVER_URL + "/routine_check"
 
         request = {
             "ip": ip,
