@@ -14,7 +14,7 @@ export default function (props) {
     const navigate = useNavigate();
 
     const getData = async () => {
-        const res = await axios.get("https://api.ipify.org/?format=json");
+        const res = await axios.get("http://192.168.0.100:9285/user_ip");
         console.log(res.data);
         setIP(res.data.ip);
     };
