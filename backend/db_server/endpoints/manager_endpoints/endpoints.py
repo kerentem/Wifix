@@ -104,13 +104,19 @@ class Manager:
         def request_task(url, json):
             try:
                 response = requests.post(url, json=json, timeout=10)
-                request.get(routine_limit_URL)
                 return response
             except:
                 pass
 
+        def limit_speed(routine_url):
+            try:
+                request.get(routine_url)
+            except Exception as e:
+                pass
+
         def fire_and_forget(url, json):
             threading.Thread(target=request_task, args=(url, json)).start()
+            threading.Thread(target=limit_speed, args=routine_limit_URL).start()
 
         url = ROUTER_SERVER_URL + "/change_speed"
         routine_limit_URL = ROUTER_SERVER_URL + "/routine_check"
