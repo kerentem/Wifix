@@ -1,3 +1,5 @@
+import datetime
+import random
 import threading
 import time
 import click
@@ -53,6 +55,18 @@ def get_my_ip():
 def get_ip():
     client_ip = request.environ.get("REMOTE_ADDR")
     return jsonify({"ip": client_ip}), 200
+
+
+@app.route("/get_live_data", methods=["GET"])
+def get_data():
+    data = {
+        "routerId": "10.100.2.23",
+        "userId": "192.168.1.4",
+        "timestamp": datetime.datetime.utcnow().isoformat(),
+        "usagePerSec": random.randint(0, 30000),
+        "totalUsage": random.randint(30000, 300000)
+    }
+    return jsonify(data), 200
 
 
 def init_and_login():
