@@ -167,13 +167,11 @@ def limit_upload_download_speed(ip, upload_speed, download_speed, company_name):
         "/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[3]/td[2]/input[1]",
     )
     port_range_from.clear()
-    port_range_from.send_keys(1)
     port_range_to = driver.find_element(
         By.XPATH,
         "/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[3]/td[2]/input[2]",
     )
     port_range_to.clear()
-    port_range_to.send_keys(8000)
     egress_bandwidth_from = driver.find_element(
         By.XPATH,
         "/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[6]/td[" "2]/input",
