@@ -8,7 +8,7 @@ cnx = mysql.connector.connect(user='root', password='Harari76',
                               host='localhost',
                               database='usersdb')
 
-SERVER_URL = 'http://localhost:5000/data'  # Replace with the server URL
+SERVER_URL = 'http://192.168.0.100:9285/get_live_data'  # Replace with the server URL
 
 
 def send_get_request():
@@ -47,4 +47,4 @@ def send_get_request():
 
 while True:
     send_get_request()
-    time.sleep(30)
+    time.sleep(120)
