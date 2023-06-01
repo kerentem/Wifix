@@ -1,3 +1,4 @@
+import logging
 import uuid
 from typing import List, Dict
 
@@ -6,6 +7,8 @@ from utiles import make_db_server_response, HttpStatus, Const
 import threading
 import requests
 from validation import validate_ip
+
+from logger_client import logger
 
 ROUTER_SERVER_URL = "http://192.168.0.100:9285"
 
@@ -90,6 +93,7 @@ class Manager:
                             upload_speed=company_speeds.premium_upload_speed,
                             download_speed=company_speeds.premium_download_speed,
                             is_cron=is_cron,
+                            company=company
                         )
             else:
                 self.change_user_speed(
@@ -97,40 +101,45 @@ class Manager:
                     upload_speed=company_speeds.regular_upload_speed,
                     download_speed=company_speeds.regular_download_speed,
                     is_cron=is_cron,
+                    company=company
                 )
 
+        # url = ROUTER_SERVER_URL + "/change_speed"
+
     @staticmethod
-    def change_user_speed(ip, upload_speed, download_speed, is_cron: bool = True):
-        def request_task(url, json):
+    def change_user_speed(ip, upload_speed, download_speed, company: str, is_cron: bool = True):
+        def change_speed(url, json):
             try:
                 response = requests.post(url, json=json, timeout=10)
                 return response
-            except:
-                pass
+            except Exception as e:
+                logging.error(e)
+
 
         def limit_speed(routine_url):
             try:
-                request.get(routine_url)
+                logger.info("Sending request to routine check")
+                requests.get(routine_url)
+
             except Exception as e:
-                pass
+                logging.error(e)
 
-        def fire_and_forget(url, json):
-            threading.Thread(target=request_task, args=(url, json)).start()
-            threading.Thread(target=limit_speed, args=routine_limit_URL).start()
+        def fire_and_forget(url):
+            threading.Thread(target=limit_speed, args=(routine_limit_URL,)).start()
 
-        url = ROUTER_SERVER_URL + "/change_speed"
         routine_limit_URL = ROUTER_SERVER_URL + "/routine_check"
 
-        request = {
-            "ip": ip,
-            "upload_speed": upload_speed,
-            "download_speed": download_speed,
-        }
-
         if is_cron:
-            fire_and_forget(url, json=request)
+            fire_and_forget(routine_limit_URL)
         else:
-            return request_task(url, json=request)
+            url = ROUTER_SERVER_URL + "/change_speed"
+            request = {
+                "ip": ip,
+                "upload_speed": upload_speed,
+                "download_speed": download_speed,
+            }
+
+            return change_speed(url, json=request)
 
     @staticmethod
     def _get_users_ip(company: str) -> Dict[str, Dict[str, int]]:

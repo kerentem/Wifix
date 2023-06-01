@@ -165,7 +165,8 @@ class User:
             Manager.change_user_speed(ip=ip,
                                       upload_speed=company_speeds.premium_upload_speed,
                                       download_speed=company_speeds.premium_download_speed,
-                                      is_cron=False, )
+                                      is_cron=False,
+                                      company=company_name)
 
             msg = f"Added WiFi session to user: {email} successfully"
             response = make_db_server_response(HttpStatus.OK, msg, {})
