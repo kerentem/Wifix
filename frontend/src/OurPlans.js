@@ -4,29 +4,7 @@ import {useNavigate, useLocation} from "react-router-dom";
 import axios from "axios";
 
 
-const plans = [
-    {
-        id: 1,
-        name: "Basic Plan",
-        price: "9.99",
-        minutes: 10,
-        features: ["50 mb/hour", "24/7 support"],
-    },
-    {
-        id: 2,
-        name: "Pro Plan",
-        price: "19.99",
-        minutes: 30,
-        features: ["100 mb/hour", "24/7 support"],
-    },
-    {
-        id: 3,
-        name: "Premium Plan",
-        price: "29.99",
-        minutes: 60,
-        features: ["200 mb/hour", "24/7 support"],
-    },
-];
+let plans;
 
 const OurPlans = () => {
     const [ip, setIP] = useState();
@@ -37,7 +15,34 @@ const OurPlans = () => {
         const res = await axios.get("http://192.168.0.100:9285/user_ip");
         console.log(res.data);
         setIP(res.data.ip);
+        const basic_price = await axios.get("http://192.168.0.100:9285/price?plan=basic");
+        const premium_price = await axios.get("http://192.168.0.100:9285/price?plan=premium")
+        const business_price = await axios.get("http://192.168.0.100:9285/price?plan=business");
+        plans = [
+    {
+        id: 1,
+        name: "Basic Plan",
+        price: basic_price,
+        minutes: 10,
+        features: ["50 mb/hour", "24/7 support"],
+    },
+    {
+        id: 2,
+        name: "Premium Plan",
+        price: premium_price,
+        minutes: 30,
+        features: ["100 mb/hour", "24/7 support"],
+    },
+    {
+        id: 3,
+        name: "Business Plan",
+        price: business_price,
+        minutes: 60,
+        features: ["200 mb/hour", "24/7 support"],
+    },
+];
     };
+
 
     useEffect(() => {
         getData();
