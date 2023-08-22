@@ -10,12 +10,15 @@ from sqlalchemy_handler.db_models import WifiSession
 
 from endpoints.manager_endpoints.endpoints import Manager
 
+from backend.db_server.pricing.pricing_helper import DynamicPricing
+
 EMAIL: bool = False
 
 
 class User:
     def __init__(self, db_handler):
         self.db_handler = db_handler
+        self.pricing_ml = DynamicPricing()
         if EMAIL:
             self.email_client = EmailClient()
 
@@ -162,11 +165,13 @@ class User:
                 return error_response
 
             company_speeds = Manager.get_company_speeds(company_name, self.db_handler)
-            Manager.change_user_speed(ip=ip,
-                                      upload_speed=company_speeds.premium_upload_speed,
-                                      download_speed=company_speeds.premium_download_speed,
-                                      is_cron=False,
-                                      company=company_name)
+            Manager.change_user_speed(
+                ip=ip,
+                upload_speed=company_speeds.premium_upload_speed,
+                download_speed=company_speeds.premium_download_speed,
+                is_cron=False,
+                company=company_name,
+            )
 
             msg = f"Added WiFi session to user: {email} successfully"
             response = make_db_server_response(HttpStatus.OK, msg, {})
@@ -224,3 +229,15 @@ class User:
             error_msg = str(e)
             error_response = make_db_server_response(HttpStatus.OK, "", {}, error_msg)
             return error_response
+
+    def get_pricing(self, data) -> float:
+        payment_method: str = data["plan"]
+        current_hour = datetime.datetime.now().hour
+
+        # TODO: need to get the number of users in the system dynamically
+        current_input = [15, current_hour]
+
+        final_price: float = self.pricing_ml.calculate_price(
+            payment_method, current_input
+        )
+        return final_price

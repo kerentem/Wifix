@@ -118,6 +118,13 @@ def get_end_session_time():
     return response
 
 
+@db_server.route(USER_ENDPOINTS.GET_PRICE, methods=["GET"])
+def get_price():
+    data = request.args
+    response = user.get_pricing(data)
+    return response
+
+
 @db_server.route(ADMIN_ENDPOINTS.REGISTER, methods=["POST"])
 def admin_register():
     data = request.get_json()

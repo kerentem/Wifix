@@ -83,17 +83,17 @@ class Manager:
                 client_speeds = clients_ips.get("client_ip")
                 if client_speeds:
                     if (
-                            client_speeds["upload_speed"]
-                            != company_speeds.premium_upload_speed
-                            or clients_ips["client_ip"]["download_speed"]
-                            != company_speeds.premium_download_speed
+                        client_speeds["upload_speed"]
+                        != company_speeds.premium_upload_speed
+                        or clients_ips["client_ip"]["download_speed"]
+                        != company_speeds.premium_download_speed
                     ):
                         self.change_user_speed(
                             ip=client_ip,
                             upload_speed=company_speeds.premium_upload_speed,
                             download_speed=company_speeds.premium_download_speed,
                             is_cron=is_cron,
-                            company=company
+                            company=company,
                         )
             else:
                 self.change_user_speed(
@@ -101,20 +101,21 @@ class Manager:
                     upload_speed=company_speeds.regular_upload_speed,
                     download_speed=company_speeds.regular_download_speed,
                     is_cron=is_cron,
-                    company=company
+                    company=company,
                 )
 
         # url = ROUTER_SERVER_URL + "/change_speed"
 
     @staticmethod
-    def change_user_speed(ip, upload_speed, download_speed, company: str, is_cron: bool = True):
+    def change_user_speed(
+        ip, upload_speed, download_speed, company: str, is_cron: bool = True
+    ):
         def change_speed(url, json):
             try:
                 response = requests.post(url, json=json, timeout=10)
                 return response
             except Exception as e:
                 logging.error(e)
-
 
         def limit_speed(routine_url):
             try:

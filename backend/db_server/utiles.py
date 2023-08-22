@@ -27,6 +27,7 @@ class USER_ENDPOINTS:
     START_WIFI_SESSION = "/wifi_session/start"
     IS_EXPIRED_WIFI_SESSION = "/wifi_session/is_expired"
     GET_END_SESSION_TIME = "/wifi_session/time_left"
+    GET_PRICE = "/price"
 
 
 class ADMIN_ENDPOINTS:

@@ -35,7 +35,7 @@ def run_scheduler():
         time.sleep(30)
 
 
-@click.command(name='scheduler')
+@click.command(name="scheduler")
 @click.pass_context
 def activate_scheduler(ctx):
     thread = threading.Thread(target=run_scheduler)
@@ -64,7 +64,7 @@ def get_data():
         "userId": "192.168.1.4",
         "timestamp": datetime.datetime.utcnow().isoformat(),
         "usagePerSec": random.randint(0, 30000),
-        "totalUsage": random.randint(30000, 300000)
+        "totalUsage": random.randint(30000, 300000),
     }
     return jsonify(data), 200
 
@@ -119,11 +119,13 @@ def cancel_limit_user():
         upload_speed: str = input_json_object["upload_speed"]
         download_speed: str = input_json_object["download_speed"]
     except Exception as e:
-        print(f"An error occurred while reading json data input: {e} + {input_json_object}")
+        print(
+            f"An error occurred while reading json data input: {e} + {input_json_object}"
+        )
         result = {"result": "Json Error"}
         return jsonify(result), 405
     ACTIVE_USERS += 1
-    UNLIMITED_USERS[f'{ACTIVE_USERS}'] = ip
+    UNLIMITED_USERS[f"{ACTIVE_USERS}"] = ip
     driver.refresh()
     driver.switch_to.frame("bottomLeftFrame")
     driver.find_element(By.XPATH, '//*[@id="a38"]').click()
@@ -132,11 +134,16 @@ def cancel_limit_user():
     driver.switch_to.frame("mainFrame")
     for i in range(3, MAX_USERS):
         try:
-            text = driver.find_element(By.XPATH,
-                                       f'/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[{i}]/td[2]').text
+            text = driver.find_element(
+                By.XPATH,
+                f"/html/body/form/center/table/tbody/tr[3]/td/table/tbody/tr[{i}]/td[2]",
+            ).text
             if ip in text:
-                driver.find_element(By.XPATH, f'/html/body/form/center'
-                                              f'/table/tbody/tr[3]/td/table/tbody/tr[{i}]/td[8]/a[2]').click()
+                driver.find_element(
+                    By.XPATH,
+                    f"/html/body/form/center"
+                    f"/table/tbody/tr[3]/td/table/tbody/tr[{i}]/td[8]/a[2]",
+                ).click()
                 result = {"result": "SUCCESS"}
                 driver.refresh()
                 return jsonify(result), 200
@@ -231,7 +238,10 @@ def limit_live_free_users() -> tuple:
     LIVE_USERS = 0
     for i in range(2, MAX_USERS):
         try:
-            driver.find_element(By.XPATH, f'//*[@id="autoWidth"]/tbody/tr[3]/td/table/tbody/tr[{i}]/td[4]')
+            driver.find_element(
+                By.XPATH,
+                f'//*[@id="autoWidth"]/tbody/tr[3]/td/table/tbody/tr[{i}]/td[4]',
+            )
             LIVE_USERS += 1
         except Exception as e:
             break
@@ -247,14 +257,20 @@ def limit_live_free_users() -> tuple:
         driver.find_element(By.XPATH, '//*[@id="a17"]').click()
         driver.switch_to.default_content()
         driver.switch_to.frame("mainFrame")
-        client_ip = driver.find_element(By.XPATH,
-                                        f'//*[@id="autoWidth"]/tbody/tr[3]'
-                                        f'/td/table/tbody/tr[{connection_index}]/td[4]').text
+        client_ip = driver.find_element(
+            By.XPATH,
+            f'//*[@id="autoWidth"]/tbody/tr[3]'
+            f"/td/table/tbody/tr[{connection_index}]/td[4]",
+        ).text
         if client_ip in UNLIMITED_USERS.values():
             continue
         else:
-            limit_upload_download_speed(ip=client_ip, download_speed=LIM_DOWNLOAD_SPEED, upload_speed=LIM_UPLOAD_SPEED,
-                                        company_name="Initial")
+            limit_upload_download_speed(
+                ip=client_ip,
+                download_speed=LIM_DOWNLOAD_SPEED,
+                upload_speed=LIM_UPLOAD_SPEED,
+                company_name="Initial",
+            )
 
     driver.refresh()
     result = {"result": "SUCCESS"}
